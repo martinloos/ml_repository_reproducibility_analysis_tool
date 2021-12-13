@@ -15,13 +15,13 @@ Installation
 First, you need to **download** this repository in order to be able to run the code locally.
 
 ```
-$ git clone https://https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
+$ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
 ```
 
 Then go into the downloaded folder
 
 ```
-$ cd ~/yourpath/ml_repository_reproducibility_analysis
+$ cd ~/yourpath/ml_repository_reproducibility_analysis_tool
 ```
 
 To ensure that the software tool works correctly, you should use the specified library versions.
