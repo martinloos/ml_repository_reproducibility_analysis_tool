@@ -2,7 +2,7 @@
 __pycache__/
 
 # Environments
-.venv
+venv
 
 # IntelliJ project files
 .idea
