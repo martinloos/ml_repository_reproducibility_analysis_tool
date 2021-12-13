@@ -6,18 +6,28 @@ Placeholder for a description of the problem that is to be solved and a referenc
 
 > Note: This tool is not in its final state and not all functions are supported yet.
 
+Requirements
+---------------------
+Accoring to [GitPython Docs](https://gitpython.readthedocs.io/en/3.1.24/intro.html) Python version >= 3.7 is required. 
+
 Installation
 ---------------------
 First, you need to **download** this repository in order to be able to run the code locally.
 
 ```
-$ git clone https://INSERT URL
+$ git clone https://https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
 ```
 
 Then go into the downloaded folder
 
 ```
 $ cd ~/yourpath/ml_repository_reproducibility_analysis
+```
+
+To ensure that the software tool works correctly, you should use the specified library versions.
+
+```
+$ pip install -r requirements.txt
 ```
 
 Usage
