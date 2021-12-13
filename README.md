@@ -17,7 +17,7 @@ $ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibili
 Then go into the downloaded folder
 
 ```
-$ cd ~/yourpath/ml_repository_reproducibility_analysis
+$ cd ~/yourpath/ml_repository_reproducibility_analysis_tool
 ```
 
 Usage
