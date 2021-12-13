@@ -48,4 +48,4 @@ $ python3 main.py -u <Repository URL> -v
 
 ## License
 
-[MIT](license URL)
+[MIT](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/LICENSE)
