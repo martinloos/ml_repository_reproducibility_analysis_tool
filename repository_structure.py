@@ -1,8 +1,4 @@
-# This is a sample Python script.
-
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows,
-# actions, and settings.
+#!/usr/bin/python3
 
 # TODO: doc
 
@@ -22,7 +18,7 @@ def get_structure(root):
             directory_name = d
             directory_path = (os.path.join(root, d))
             directory_size = (os.stat(directory_path)).st_size
-            directory_entity = (directory_name, directory_path, directory_size)
+            directory_entity = directory_name, directory_path, directory_size
             directory_list.append(directory_entity)
         for f in files:
             # file_name, path_to_file, file_size
