@@ -9,21 +9,21 @@ from rich.table import Table
 
 # assuming license to be open source if they are according to FSF
 # see: https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
-fsf_open_source_licenses = ['academic free', 'affero general public', 'apache',
-                            'apple public source license 2.0', 'aristic license 2.0', 'bsd',
-                            'boost software', 'cecill', 'common development and distribution',
-                            'common public', 'creative commons', 'cryptix general',
-                            'eclipse public', 'educational community', 'eiffel forum',
-                            'european union public', 'gnu', 'ibm public',
-                            'intel open source', 'isc', 'latex project public',
-                            'microsoft public', 'microsoft reciprocal', 'mit',
-                            'mozilla public', 'netscape public', 'open software',
-                            'openssl', 'php license', 'python software foundation',
-                            'q public license', 'sleepycat license',
-                            'sun industry standards source', 'sun public',
-                            'unilicense', 'w3c software notice', 'wtfpl',
-                            'do what the fuck you want to public', 'xfree86 1.1',
-                            'zlib/libpng', 'zope public']
+fsf_open_source_licenses = ['Academic Free', 'Affero General Public', 'Apache',
+                            'Apple Public Source License 2.0', 'Aristic License 2.0', 'BSD',
+                            'Boost Software', 'CeCILL', 'Common Development and Distribution',
+                            'Common Public', 'Creative Commons', 'Cryptix General',
+                            'Eclipse Public', 'Educational Community', 'Eiffel Forum',
+                            'European Union Public', 'GNU', 'IBM Public',
+                            'Intel Open Source', 'ISC', 'LaTeX Project Public',
+                            'Microsoft Public', 'Microsoft Reciprocal', 'MIT',
+                            'Mozilla Public', 'Netscape Public', 'Open Software',
+                            'OpenSSL', 'PHP License', 'Python Software Foundation',
+                            'Q Public License', 'Sleepycat License',
+                            'Sun Industry Standards Source', 'Sun Public',
+                            'Unilicense', 'W3C Software Notice', 'WTFPL',
+                            'Do What The Fuck You Want', 'XFree86 1.1',
+                            'zlib/libpng', 'Zope Public']
 
 open_source_licenses = []
 non_open_source_licenses = []
@@ -49,12 +49,8 @@ def analyse_license(verbose):
 
 
 def get_license_text(license_path):
-    number_of_lines = 3
-    license_text = ''
     license_file = open(license_path, "r")
-    for i in range(number_of_lines):
-        line = license_file.readline().lower()
-        license_text = license_text + line
+    license_text = license_file.read()
     license_file.close()
 
     return license_text
@@ -121,6 +117,3 @@ def build_license_response(verbose):
                 table.add_row(element[0], element[1])
             console.print(table)
             print('\n')
-
-    # TODO: store results and provide getter for result_builder
-
