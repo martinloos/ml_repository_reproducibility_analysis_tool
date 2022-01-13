@@ -8,17 +8,22 @@ import repository_structure
 from rich import print
 from rich.console import Console
 from rich.table import Table
+import re
 
 logger = logging.getLogger('log')
 
-accepted_dataset_folders = {'datasets', 'dataset', 'images'}
+reg = re.compile("(((.+)?data(.+)?)|((.+)?im(a)?g))")
 dataset_folders = []
+dvc_folder = []
 
 accepted_files = {'readme', 'requirements', 'config.yml', 'config.yaml', 'conda.env', 'license', 'dockerfile'}
 readme = []
 jupyter_notebooks = []
 config_files = []
 repo_license = []
+
+config_file_reg = \
+    re.compile("(((.+)?(conda|env)(.+)?\\.y(a)?ml)|((.+)?requirements(.+)?\\.txt)|((.+)?(^|[^.])(docker)(.+)?))")
 
 
 def get_repository_structure(local_repo_dir_path):
@@ -32,23 +37,28 @@ def get_relevant_artefacts(local_repo_dir_path, verbose):
     files = structure_response[1]
 
     for d in directories:
-        if d[0].lower() in accepted_dataset_folders:
+        if bool(re.match(reg, d[0].lower())):
             dataset_folders.append(d)
+        if d[0].lower() == '.dvc':
+            dvc_folder.append(d)
 
     for f in files:
         file_name = f[0].lower()
         file_extension = pathlib.PurePosixPath(file_name).suffix
         if file_extension == '.ipynb':
             jupyter_notebooks.append(f)
-        else:
-            for file_type in accepted_files:
-                if file_type in file_name:
-                    if 'readme' in file_name:
-                        readme.append(f)
-                    elif 'license' in file_name:
-                        repo_license.append(f)
-                    else:
-                        config_files.append(f)
+        elif file_extension == '.py':
+            jupyter_notebooks.append(f)
+        elif 'readme' in file_name:
+            readme.append(f)
+        elif 'license' in file_name:
+            # for .doctree: UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 0: invalid
+            # start byte
+            if '.doctree' not in file_name:
+                repo_license.append(f)
+        elif '.dockerignore' not in file_name:
+            if bool(re.match(config_file_reg, file_name)):
+                config_files.append(f)
 
     if verbose == 1:
         print('\n')
@@ -138,3 +148,11 @@ def get_dataset_folders():
 
 def get_config_files():
     return config_files
+
+
+def get_source_code_files():
+    return jupyter_notebooks
+
+
+def get_dvc_folder():
+    return dvc_folder
