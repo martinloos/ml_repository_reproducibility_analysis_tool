@@ -8,7 +8,7 @@ Placeholder for a description of the problem that is to be solved and a referenc
 
 Requirements
 ---------------------
-Accoring to [GitPython Docs](https://gitpython.readthedocs.io/en/3.1.24/intro.html) Python version >= 3.7 is required. 
+Accoring to [GitPython Docs](https://gitpython.readthedocs.io/en/3.1.20/intro.html) Python version >= 3.6 is required. 
 
 Installation
 ---------------------
