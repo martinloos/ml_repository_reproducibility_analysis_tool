@@ -2,25 +2,28 @@
 
 # main.py is the entrance point for the machine learning reproducibility analyzer
 
-# TODO: requirements.txt with library versions
 # TODO: README how to set up + use this tool (why useful + options to run)
-
 # TODO: maybe provide logs also in a persistent log file (additional)
+# TODO: MAKE CLEAN UP optional? -> Maybe someone wants to keep the repo locally
 
 import getopt
 import logging
 import sys
 import shutil
 import re
-
 from rich import print
 
 import repository_cloner
 import filter_repository_artefacts
 import readme_analysis
 import license_analysis
+import source_code_analysis
+import config_files_analysis
+import dataset_analysis
 import result_builder
 
+
+# TODO: give user possibility to specify BinderHub himself
 # TODO: give user possibility to specify it himself
 csv_path = '/tmp/'
 csv_name = 'ml_repo_reproducibility_analyzer'
@@ -101,10 +104,6 @@ def main(argv):
                 print("\n:smiley: [bold green]Repository already analyzed.[/bold green]\n")
                 sys.exit()
 
-            # builds the repository with BinderHub
-            # API call response can either be successful or not
-            # TODO: BINDER HUB CALL
-
             # downloads public repository
             logger.info('Downloading repository ' + repository_url + ' ...')
             local_repo_dir = repository_cloner.clone_repo(repository_url)
@@ -121,13 +120,11 @@ def main(argv):
 
             if filter_repository_artefacts.get_readme():
                 readme_analysis.analyse_readme(verbose)
+                logger.info("Finished analysis for README file(s).")
             else:
                 # if no readmes are detected/present
-                # TODO: what to do now?
                 logger.warning('No readme file(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No readme(s) detected.[/bold red]')
-
-            logger.info("Finished analysis for README file(s).")
 
             # scans found licenses for open-source licenses
             # saves all open-source licenses into list
@@ -136,38 +133,56 @@ def main(argv):
 
             if filter_repository_artefacts.get_license():
                 license_analysis.analyse_license(verbose)
+                logger.info("Finished analysis for LICENSE file(s).")
             else:
                 # if no licenses are detected/present
-                # TODO: what to do now?
                 logger.warning('No license file(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No license(s) detected.[/bold red]')
 
-            logger.info("Finished analysis for LICENSE file(s).")
+            if filter_repository_artefacts.get_dataset_folders():
+                dataset_analysis.analyse_datasets()
+                logger.info("Finished analysis of possible dataset folder(s).")
+            else:
+                # if no dataset folder(s) are detected/present
+                logger.warning('No dataset folder(s) to analyse detected.')
+                print(':pile_of_poo: [bold red]No dataset folder(s) detected.[/bold red]')
 
-            # TODO: DATASET: Check for file types/sizes to assume if there is relevant data inside
-            # TODO: note them in order to check if any datasets are mentioned in jupyter notebooks
+            if filter_repository_artefacts.get_source_code_files():
+                source_code_analysis.analyze_source_code(verbose)
+                logger.info("Finished analysis for source code file(s).")
+            else:
+                # if no source code files are detected/present
+                logger.warning('No source code file(s) to analyse detected.')
+                print(':pile_of_poo: [bold red]No source code file(s) detected.[/bold red]')
 
-            # TODO: SOURCE CODE ANALYSIS -> JUPYTER NOTEBOOK ANALYSIS
-            # TODO: note used imports in source code (JN)
+            # use data collected from dataset analysis + source code analysis
+            dataset_analysis.build_dataset_response(verbose)
 
-            # TODO: CONFIG FILE ANALYSIS (note all libraries, are they version specified?)
-            # TODO: Compare libraries mentioned in config files against the used ones in the source code
-            # TODO: MAYBE! Check if libraries found/used are publicly available
+            if filter_repository_artefacts.get_config_files():
+                config_files_analysis.analyse_config_files(verbose)
+                logger.info("Finished analysis for config file(s).")
+            else:
+                # if no config files are detected/present
+                logger.warning('No config file(s) to analyse detected.')
+                print(':pile_of_poo: [bold red]No config file(s) detected.[/bold red]')
 
-            # TODO: MAKE CLEAN UP optional? -> Maybe someone wants to keep the repo locally
+            # builds the repository with BinderHub
+            # API call response can either be successful or not
+            # TODO: BINDER HUB CALL
+
             try:
                 shutil.rmtree(local_repo_dir)
                 logger.info('Removed ' + local_repo_dir + '.')
             except OSError as e:
                 logger.error("%s : %s" % (local_repo_dir, e.strerror))
 
-            # TODO: BUILD RESULT FILE (bring all / most important data together)
-            # bring all the infos together
+            # brings all the data together
             result_builder.build_result(repository_url, output_file)
-
             print('\n:thumbs_up: [bold green]Finished repository reproducibility analysis.[/bold green]\n')
         elif opt not in ('-v', '--verbose'):
             logger.error('Use "python3 main.py -h" for help test')
+
+            # TODO: implement feedback builder
 
 
 if __name__ == '__main__':
