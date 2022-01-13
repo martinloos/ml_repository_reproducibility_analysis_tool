@@ -36,9 +36,6 @@ inaccessible_readme_links = []
 readme_analysis = []
 
 
-# TODO: github url currently only for one readme!
-# TODO: get github url for each readme
-# TODO: maybe better to delete the scoring api call -> computation of scoring seems odd
 def analyse_readme(verbose):
     readme = filter_repository_artefacts.get_readme()
     if readme:
@@ -56,9 +53,9 @@ def analyse_readme(verbose):
         logger.warning('Found no readme to analyse')
 
 
-def readme_length(readme_name):
+def readme_length(readme_path):
     i = 0
-    with open(readme_name) as r:
+    with open(readme_path) as r:
         for i, l in enumerate(r):
             pass
     return i + 1
@@ -112,10 +109,15 @@ def get_readme_analysis():
     return readme_analysis
 
 
+def calculate_percentage(value1, value2):
+    return round(100 * float(value1) / float(value2), 2)
+
+
 def build_readme_response(verbose):
     number_of_readmes = len(readme_data)
     readme_length_sum = 0
     readme_with_binder_badge = []
+    percentage_of_inaccessible_links = 0
 
     for element in readme_data:
         readme_length_sum = readme_length_sum + element[2]
@@ -127,7 +129,9 @@ def build_readme_response(verbose):
     total_number_of_links = len(readme_links)
     total_number_of_paper_links = len(readme_paper_links)
     total_number_of_inaccessible_links = len(inaccessible_readme_links)
-    percentage_of_inaccessible_links = total_number_of_inaccessible_links * 100 / total_number_of_links
+    if not total_number_of_links == 0:
+        percentage_of_inaccessible_links = calculate_percentage(total_number_of_inaccessible_links,
+                                                                total_number_of_links)
 
     readme_analysis.append(number_of_readmes)
     readme_analysis.append(readme_length_sum)
@@ -189,7 +193,6 @@ def build_readme_response(verbose):
             console.print(table)
             print('\n')
 
-        # TODO: test
         if readme_with_binder_badge:
             table = Table(show_header=True, header_style="bold yellow")
             table.add_column("README: READMES CONTAINING A BINDER BADGE", justify="left")
@@ -197,5 +200,3 @@ def build_readme_response(verbose):
                 table.add_row(element)
             console.print(table)
             print('\n')
-
-    # TODO: store results and provide getter for result_builder
