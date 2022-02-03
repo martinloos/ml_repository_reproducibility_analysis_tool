@@ -45,8 +45,9 @@ def python_code_analysis(file_name, file_path, dataset_candidates, verbose):
     fixed_random_seed_lines = []
     unfixed_random_seed_lines = []
 
-    for line in sc_lines:
-        if not line.isspace():
+    for l in sc_lines:
+        if not l.isspace():
+            line = l.strip()
             if line[:1] == '#':
                 comment = parse_comment_line(line)
                 if comment:
@@ -118,12 +119,11 @@ def get_file_directory(file_path):
 
 
 def convert_jupyter_nb_to_py(file_name):
-    f_name_tmp = file_name
-    if ' ' in file_name:
-        f_name_tmp = file_name.replace(' ', "\ ")
-    os.system('jupyter nbconvert --to script ' + str(f_name_tmp))
-    file_name = file_name.replace('.ipynb', '.py')
-    return file_name
+    f_name = re.sub(r"[^a-zA-Z0-9.]", "", file_name)
+    os.rename(file_name, f_name)
+    os.system('jupyter nbconvert --to script ' + str(f_name) + ' --to python')
+    f_name = f_name.replace('.ipynb', '.py')
+    return f_name
 
 
 def parse_comment_line(comment_line):
@@ -282,8 +282,7 @@ def build_feedback(code_lines, comment_lines, imp_lines, number_of_code_lines, n
     table.add_column("value", justify="right")
     table.add_row('# code lines:', str(number_of_code_lines))
     table.add_row('# comment lines', str(number_of_comment_lines))
-    table.add_row('Code-comment-ratio', str(round(number_of_code_lines / (number_of_code_lines +
-                                                                           number_of_comment_lines), 2)) + '%')
+    table.add_row('Code-comment-ratio', str(round(number_of_code_lines / number_of_comment_lines, 2)))
     table.add_row('Pylint rating', str(pylint_rating))
     console.print(table)
     print('\n')
