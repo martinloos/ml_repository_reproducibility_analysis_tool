@@ -38,8 +38,10 @@ readme_analysis = []
 
 def analyse_readme(verbose):
     readme = filter_repository_artefacts.get_readme()
+    counter = 1
     if readme:
         for file in readme:
+            logger.info('Processing readme ' + str(counter) + ' out of ' + str(len(readme)))
             readme_name = file[0]
             readme_file_path = file[1]
             length = readme_length(readme_file_path)
@@ -48,6 +50,7 @@ def analyse_readme(verbose):
             has_binder_badge = check_binder_badge(readme_file_path)
             readme_files = [readme_name, readme_file_path, length, has_binder_badge]
             readme_data.append(readme_files)
+            counter = counter + 1
         build_readme_response(verbose)
     else:
         logger.warning('Found no readme to analyse')
@@ -125,7 +128,7 @@ def build_readme_response(verbose):
         if is_binder_badge_present == 1:
             readme_with_binder_badge.append(element[1])
 
-    average_readme_length = readme_length_sum / number_of_readmes
+    average_readme_length = round(readme_length_sum / number_of_readmes, 2)
     total_number_of_links = len(readme_links)
     total_number_of_paper_links = len(readme_paper_links)
     total_number_of_inaccessible_links = len(inaccessible_readme_links)
