@@ -12,6 +12,8 @@ import sys
 import shutil
 import re
 from rich import print
+import json
+
 
 import repository_cloner
 import filter_repository_artefacts
@@ -20,8 +22,9 @@ import license_analysis
 import source_code_analysis
 import config_files_analysis
 import dataset_analysis
+import binderhub_call
 import result_builder
-
+import feedback_builder
 
 # TODO: give user possibility to specify BinderHub himself
 # TODO: give user possibility to specify it himself
@@ -55,7 +58,6 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt in ('-h', '--help'):
-
             print(' _____________________________________________________________________')
             print('|                                                                     |')
             print('|                      [bold]HELPFUL INFORMATION[/bold]                            |')
@@ -90,7 +92,7 @@ def main(argv):
                 elif 'http' in repository_url:
                     repository_url = repository_url.replace('http', 'https')
 
-            # assuming that the repository is stored on github or gitlab
+            # assuming that the repository is stored on github
             if 'github' not in repository_url:
                 logger.error('URL incorrect. Accepted are repositories from github. Use "python3 main.py -h" for help.')
                 sys.exit()
@@ -119,7 +121,7 @@ def main(argv):
             logger.info("Started analysis for README file(s) ...")
 
             if filter_repository_artefacts.get_readme():
-                readme_analysis.analyse_readme(verbose)
+                # readme_analysis.analyse_readme(verbose)
                 logger.info("Finished analysis for README file(s).")
             else:
                 # if no readmes are detected/present
@@ -132,7 +134,7 @@ def main(argv):
             logger.info("Started analysis for LICENSE file(s) ...")
 
             if filter_repository_artefacts.get_license():
-                license_analysis.analyse_license(verbose)
+                # license_analysis.analyse_license(verbose)
                 logger.info("Finished analysis for LICENSE file(s).")
             else:
                 # if no licenses are detected/present
@@ -140,15 +142,15 @@ def main(argv):
                 print(':pile_of_poo: [bold red]No license(s) detected.[/bold red]')
 
             if filter_repository_artefacts.get_dataset_folders():
-                dataset_analysis.analyse_datasets()
-                logger.info("Finished analysis of possible dataset folder(s).")
+                # dataset_analysis.analyse_datasets()
+                logger.info("Finished analysis of possible dataset files(s).")
             else:
                 # if no dataset folder(s) are detected/present
                 logger.warning('No dataset folder(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No dataset folder(s) detected.[/bold red]')
 
             if filter_repository_artefacts.get_source_code_files():
-                source_code_analysis.analyze_source_code(verbose)
+                # source_code_analysis.analyze_source_code(verbose)
                 logger.info("Finished analysis for source code file(s).")
             else:
                 # if no source code files are detected/present
@@ -159,7 +161,7 @@ def main(argv):
             dataset_analysis.build_dataset_response(verbose)
 
             if filter_repository_artefacts.get_config_files():
-                config_files_analysis.analyse_config_files(verbose)
+                # config_files_analysis.analyse_config_files(verbose)
                 logger.info("Finished analysis for config file(s).")
             else:
                 # if no config files are detected/present
@@ -168,7 +170,12 @@ def main(argv):
 
             # builds the repository with BinderHub
             # API call response can either be successful or not
-            # TODO: BINDER HUB CALL
+            print('\n[bold green]Initiating BinderHub build. This may take a while...[/bold green]\n')
+            repo_url_lst = repository_url.replace('https://', '').replace('www.', '')\
+                .replace('github.com/', '').split('/')
+            repo_author = repo_url_lst[0]
+            repo_name = repo_url_lst[1]
+            binderhub_call.call_binderhub_to_build(repo_author, repo_name)
 
             try:
                 shutil.rmtree(local_repo_dir)
@@ -178,11 +185,26 @@ def main(argv):
 
             # brings all the data together
             result_builder.build_result(repository_url, output_file)
+            # builds feedback for each factor
+            # TODO: implement feedback builder
+            feedback_builder.build_feedback()
             print('\n:thumbs_up: [bold green]Finished repository reproducibility analysis.[/bold green]\n')
         elif opt not in ('-v', '--verbose'):
             logger.error('Use "python3 main.py -h" for help test')
 
-            # TODO: implement feedback builder
+
+def find_values(id, json_repr):
+    results = []
+
+    def _decode_dict(a_dict):
+        try:
+            results.append(a_dict[id])
+        except KeyError:
+            pass
+        return a_dict
+
+    json.loads(json_repr, object_hook=_decode_dict) # Return value ignored.
+    return results
 
 
 if __name__ == '__main__':
