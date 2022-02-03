@@ -46,9 +46,15 @@ def retrieve_all_config_imports():
         file_name = file[0].lower()
         file_path = file[1]
 
-        config_text = open(file_path, "r", encoding="utf8", errors='ignore')
-        config_lines = config_text.readlines()
-        config_text.close()
+        config_lines = []
+
+        with open(file_path, "rb") as config_text:
+            conf_text_lines = config_text.read()
+            # thanks to https://stackoverflow.com/questions/67734203/reading-a-txt-and-getting-weird-behavior
+            dec_lines = conf_text_lines.decode('utf-16le', 'ignore')
+            dec_llist = dec_lines.split('\n')
+            for line in dec_llist:
+                config_lines.append(line.lower())
 
         # requirements
         if 'requirements' in file_name:
@@ -71,6 +77,8 @@ def retrieve_all_config_imports():
 # and: https://github.com/tirthajyoti/Machine-Learning-with-Python/blob/master/Deployment
 # /Linear_regression/requirements.txt
 def retrieve_imports_from_requirements(config_lines):
+    print('all config lines from requirements')
+    print(config_lines)
     for line in config_lines:
         line = line.replace('\n', '').replace(' ', '').replace('\\', '')
         if not (line.startswith('#') or line.startswith('-')):
@@ -204,11 +212,12 @@ def extract_lib_name_from_requirements(imp_line):
 # 3 check how many of the used libraries are specified in the configs
 def compare_config_imp_with_sc_imp():
     for imp in source_code_imports:
-        if imp not in all_unique_lib_imports:
-            used_but_not_in_config.append(imp)
-        else:
+        imp_tmp = imp.lower()
+        if imp_tmp not in all_unique_lib_imports:
+            if imp_tmp not in used_but_not_in_config:
+                used_but_not_in_config.append(imp)
+        elif imp_tmp not in used_and_in_config:
             used_and_in_config.append(imp)
-
 
 # 4 check if imports are all public available
 # TODO: Ideas on how to do that
@@ -230,8 +239,6 @@ def build_config_analysis_result(verbose):
         os_specified = 'Yes'
     else:
         os_specified = 'No'
-
-    # TODO: OS specification if dockerfile
 
     number_of_unique_config_imports = len(all_unique_lib_imports)
 
@@ -296,6 +303,7 @@ def build_config_analysis_result(verbose):
             console.print(table)
             print('\n')
 
+        # strict specified would be library == version, not strict e.g. library >= version
         if specified_not_strict_imports:
             table = Table(show_header=True, header_style="bold green")
             table.add_column("UNIQUE SPECIFIED (BUT NOT STRICT) LIBRARIES IN CONFIG FILE(s)", justify="left")
