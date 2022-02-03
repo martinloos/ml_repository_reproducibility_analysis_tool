@@ -18,7 +18,7 @@ dvc_folder = []
 
 accepted_files = {'readme', 'requirements', 'config.yml', 'config.yaml', 'conda.env', 'license', 'dockerfile'}
 readme = []
-jupyter_notebooks = []
+source_code_files = []
 config_files = []
 repo_license = []
 
@@ -46,9 +46,9 @@ def get_relevant_artefacts(local_repo_dir_path, verbose):
         file_name = f[0].lower()
         file_extension = pathlib.PurePosixPath(file_name).suffix
         if file_extension == '.ipynb':
-            jupyter_notebooks.append(f)
+            source_code_files.append(f)
         elif file_extension == '.py':
-            jupyter_notebooks.append(f)
+            source_code_files.append(f)
         elif 'readme' in file_name:
             readme.append(f)
         elif 'license' in file_name:
@@ -120,15 +120,15 @@ def get_relevant_artefacts(local_repo_dir_path, verbose):
             console.print(table)
             print('\n')
 
-        if not jupyter_notebooks:
-            logger.warning('No jupyter notebook(s) detected.')
-            print(':pile_of_poo: [bold red]No jupyter notebook(s) detected.[/bold red]')
+        if not source_code_files:
+            logger.warning('No jupyter notebook(s) or .py files detected.')
+            print(':pile_of_poo: [bold red]No jupyter notebook(s) or .py files detected.[/bold red]')
         else:
-            print('[bold green] JUPYTER NOTEBOOK(s)[/bold green]')
+            print('[bold green] JUPYTER NOTEBOOK(s) + PYTHON FILES [/bold green]')
             table = Table(show_header=True, header_style="bold dim")
             table.add_column("File name", justify="left")
             table.add_column("File path", justify="left")
-            for jn in jupyter_notebooks:
+            for jn in source_code_files:
                 table.add_row(jn[0], jn[1])
             console.print(table)
             print('\n')
@@ -151,7 +151,7 @@ def get_config_files():
 
 
 def get_source_code_files():
-    return jupyter_notebooks
+    return source_code_files
 
 
 def get_dvc_folder():
