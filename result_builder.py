@@ -11,12 +11,17 @@ import license_analysis
 import source_code_analysis
 import config_files_analysis
 import dataset_analysis
+import binderhub_call
 
 # TODO: doc
 # Builds result with retrieved data
 # Stores result in file
 
 analysis_result = []
+
+
+def get_analysis_result():
+    return analysis_result
 
 
 def build_result(repository_url, output_file):
@@ -41,6 +46,8 @@ def build_result(repository_url, output_file):
     if not dataset_result:
         dataset_result = build_zero_value_list(5)
 
+    binderhub_result = binderhub_call.get_result()
+
     result = [repository_url, readme_result[0], readme_result[1], readme_result[2], readme_result[3], readme_result[4],
               readme_result[5], readme_result[6], license_result[0], license_result[1], license_result[2],
               source_code_result[0], source_code_result[1], source_code_result[2], source_code_result[3],
@@ -48,7 +55,8 @@ def build_result(repository_url, output_file):
               source_code_result[8], source_code_result[9], source_code_result[10], source_code_result[11],
               source_code_result[12], source_code_result[13], config_analysis[0], config_analysis[1],
               config_analysis[2], config_analysis[3], config_analysis[4], config_analysis[5], config_analysis[6],
-              dataset_result[0], dataset_result[1], dataset_result[2], dataset_result[3], dataset_result[4]]
+              dataset_result[0], dataset_result[1], dataset_result[2], dataset_result[3], dataset_result[4],
+              binderhub_result[0]]
 
     analysis_result.extend(result)
 
@@ -87,7 +95,8 @@ def make_csv_header():
             '% unique imports used in source code + mentioned in config file(s) in relation to all used',
             'dataset folders found?', '# dataset folder candidates', '# dataset file candidates',
             '# found dataset file candidates mentioned in source code',
-            '% mentioned dataset files in relation to all found candidate files']
+            '% mentioned dataset files in relation to all found candidate files',
+            'out-of-the-box buildable with binderhub']
 
 
 def check_repository(repository_url, output_file):
@@ -110,9 +119,6 @@ def write_list_to_csv(result_list, output_file):
 
 
 def build_terminal_response():
-
-    print(analysis_result)
-
     console = Console()
 
     print('\n\n')
@@ -146,7 +152,7 @@ def build_terminal_response():
     table.add_row('% of jupyter notebooks /w footer', str(analysis_result[20]))
     table.add_row('# random seed lines', str(analysis_result[21]))
     table.add_row('% fixed random seed lines', str(analysis_result[22]))
-    table.add_row('Data version control used?', analysis_result[23])
+    table.add_row('Data version control used?', str(analysis_result[23]))
     table.add_row('# hyperparameter documentation indicators', str(analysis_result[24]))
     table.add_row('# config files', str(analysis_result[25]))
     table.add_row('OS specified in config file(s)', str(analysis_result[26]))
@@ -164,5 +170,6 @@ def build_terminal_response():
     table.add_row('# found dataset file candidates mentioned in source code', str(analysis_result[35]))
     table.add_row('% mentioned dataset files in relation to all found candidate files',
                   str(analysis_result[36]))
+    table.add_row('out-of-the-box buildable with binderhub?', str(analysis_result[37]))
     console.print(table)
     print('\n')
