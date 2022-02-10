@@ -271,6 +271,11 @@ def remove_leading_whitespace(line):
 def build_feedback(code_lines, comment_lines, imp_lines, number_of_code_lines, number_of_comment_lines,
                    file_name, file_path, pylint_rating, fixed_rdm_seed_lines, unfixed_rdm_seed_lines,
                    hp_import_indicators, hp_code_indicators):
+    # > 1 means there is more code lines than comment lines
+    if number_of_comment_lines > 0:
+        code_comment_ratio = round(number_of_code_lines / number_of_comment_lines, 2)
+    else:
+        code_comment_ratio = number_of_code_lines
     console = Console()
 
     print('\n:detective: [bold magenta] Result of source code analysis of ' + file_name + '. Path to file: '
@@ -282,7 +287,7 @@ def build_feedback(code_lines, comment_lines, imp_lines, number_of_code_lines, n
     table.add_column("value", justify="right")
     table.add_row('# code lines:', str(number_of_code_lines))
     table.add_row('# comment lines', str(number_of_comment_lines))
-    table.add_row('Code-comment-ratio', str(round(number_of_code_lines / number_of_comment_lines, 2)))
+    table.add_row('Code-comment-ratio', str(code_comment_ratio))
     table.add_row('Pylint rating', str(pylint_rating))
     console.print(table)
     print('\n')
