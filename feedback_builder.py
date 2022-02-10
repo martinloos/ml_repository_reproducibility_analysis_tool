@@ -378,7 +378,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
         ds_feedback.append('> Important note: If you have provided a dataset in your repository but this tool has not '
                            'detected it, move it in a folder named "data" or rename the dataset with "data" in name.\n')
 
-        ds_feedback.append('Dataset availability and preprocessing is calculated from the above identifiers. '
+        ds_feedback.append('> Dataset availability and preprocessing is calculated from the above identifiers. '
                            'Since these have a different influence on the overall result, they are weighted as '
                            'follows:\n\n'
                            + '- Number of dataset file candidates weight: ' + str(candidates_weight) + '\n'
