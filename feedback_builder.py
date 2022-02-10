@@ -78,7 +78,7 @@ def source_code_availability_documentation_feedback(analysis_result):
     avg_pylint_score = analysis_result[17]
     pylint_value = range_normalization(avg_pylint_score, -10, 10, 0, 1)
 
-    sc_feedback.append('\t3. Source-code pylint rating (score: '
+    sc_feedback.append('3. Source-code pylint rating (score: '
                        + str(round(pylint_value, 2))
                        + ' out of 1.0): Not normalized pylint rating is '
                        + str(round(avg_pylint_score, 2))
@@ -96,7 +96,7 @@ def source_code_availability_documentation_feedback(analysis_result):
                                                         5 * BL_CODE_COMMENT_RATIO, 0, 1))
     weighted_code_comment_ratio_value = code_comment_ratio_value * code_comment_ratio_weight
 
-    sc_feedback.append('\t4. Source-code-comment-ratio rating (score: '
+    sc_feedback.append('4. Source-code-comment-ratio rating (score: '
                        + str(round(code_comment_ratio_value, 2))
                        + ' out of 1.0): We determined '
                        + str(BL_CODE_COMMENT_RATIO)
@@ -107,18 +107,18 @@ def source_code_availability_documentation_feedback(analysis_result):
     actual_value = weighted_license_value + weighted_readme_value + weighted_pylint_value \
                    + weighted_code_comment_ratio_value
 
-    sc_feedback.append('\tSource-code availability and documentation is calculated from the above identifiers. '
+    sc_feedback.append('> Source-code availability and documentation is calculated from the above identifiers. '
                        'Since these have a different influence on the overall result, they are weighted as follows:\n\n'
-                       + '\tLicense weight: ' + str(total_license_weight) + '\n'
-                       + '\tSub-readme: Length weight: ' + str(avg_readme_length_weight) + '\n'
-                       + '\tSub-readme: # links weight: ' + str(avg_readme_links_weight) + '\n'
-                       + '\tSub-readme: % accessible links weight: ' + str(pct_acc_links_weight) + '\n'
-                       + '\tReadme weight: ' + str(total_readme_weight) + '\n'
-                       + '\tPylint weight: ' + str(avg_pylint_score_weight) + '\n'
-                       + '\tCode-comment-ratio weight: ' + str(code_comment_ratio_weight))
+                       + '- License weight: ' + str(total_license_weight) + '\n'
+                       + '- Readme weight: ' + str(total_readme_weight) + '\n'
+                       + '- Sub-readme: Length weight: ' + str(avg_readme_length_weight) + '\n'
+                       + '- Sub-readme: # links weight: ' + str(avg_readme_links_weight) + '\n'
+                       + '- Sub-readme: % accessible links weight: ' + str(pct_acc_links_weight) + '\n'
+                       + '- Pylint weight: ' + str(avg_pylint_score_weight) + '\n'
+                       + '- Code-comment-ratio weight: ' + str(code_comment_ratio_weight))
 
     sc_availability_documentation_value = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
-    factor_result.append('\tSource-code availability and documentation: ' + str(sc_availability_documentation_value))
+    factor_result.append('Source-code availability and documentation: ' + str(sc_availability_documentation_value))
     return sc_availability_documentation_value
 
 
@@ -126,17 +126,17 @@ def calculate_license_value(nbr_licenses, nbr_os_licenses):
     normalized_license_value = range_normalization(nbr_os_licenses, 0, nbr_licenses, 0, 1)
 
     if nbr_licenses == 0:
-        sc_feedback.append('\t1. License rating (score: '
+        sc_feedback.append('1. License rating (score: '
                            + str(round(normalized_license_value, 2))
                            + ' out of 1.0): No license information found. Providing a licenses helps others to tell if '
                              'your project and its dependencies are available to them.\n')
     elif nbr_os_licenses == 0:
-        sc_feedback.append('\t1. License rating (score: '
+        sc_feedback.append('1. License rating (score: '
                            + str(round(normalized_license_value, 2))
                            + ' out of 1.0): All found licenses are not open-source. Using open-source dependencies '
                              'enables others to use them also.\n')
     elif nbr_licenses != nbr_os_licenses:
-        sc_feedback.append('\t1. License rating (score: '
+        sc_feedback.append('1. License rating (score: '
                            + str(round(normalized_license_value, 2))
                            + ' out of 1.0): '
                            + str((nbr_licenses - nbr_os_licenses))
@@ -145,7 +145,7 @@ def calculate_license_value(nbr_licenses, nbr_os_licenses):
                            + ' found licenses are not open-source. Using open-source dependencies enables others to '
                              'use them also.\n')
     else:
-        sc_feedback.append('\t1. License rating (score: '
+        sc_feedback.append('1. License rating (score: '
                            + str(round(normalized_license_value, 2))
                            + ' out of 1.0): All found licenses are open-source.\n')
 
@@ -157,40 +157,42 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
     # TODO: user feedback on how to improve (if necessary)
     nbr_readmes = analysis_result[1]
 
+    sc_feedback_queue = []
+
     if nbr_readmes > 0:
         avg_readme_length = analysis_result[3]
         avg_readme_length_value = range_normalization(avg_readme_length, 0, BL_AVG_README_LINES, 0,
                                                       1) * avg_length_weight
 
-        sc_feedback.append('\tSub-value for ReadMe: Average length rating (score: '
-                           + str(round(avg_readme_length_value / avg_length_weight, 2))
-                           + ' out of 1.0): We determined that '
-                           + str(BL_AVG_README_LINES)
-                           + ' or more lines are best. We found '
-                           + str(avg_readme_length)
-                           + ' lines (in average) in the ReadMe file(s)')
+        sc_feedback_queue.append('- Average length rating (score: '
+                                 + str(round(avg_readme_length_value / avg_length_weight, 2))
+                                 + ' out of 1.0): We determined that '
+                                 + str(BL_AVG_README_LINES)
+                                 + ' or more lines are best. We found '
+                                 + str(avg_readme_length)
+                                 + ' lines (in average) in the ReadMe file(s)')
 
         avg_readme_links = analysis_result[4] / nbr_readmes
         avg_readme_links_value = range_normalization(avg_readme_links, 0, BL_AVG_README_LINKS, 0, 1) * avg_links_weight
 
-        sc_feedback.append('\tSub-value for ReadMe: Average links rating (score: '
-                           + str(round(avg_readme_links_value / avg_links_weight, 2))
-                           + ' out of 1.0): We determined that '
-                           + str(BL_AVG_README_LINKS)
-                           + ' or more links are best. We found '
-                           + str(avg_readme_links)
-                           + ' links (in average) in the ReadMe file(s)')
+        sc_feedback_queue.append('- Average links rating (score: '
+                                 + str(round(avg_readme_links_value / avg_links_weight, 2))
+                                 + ' out of 1.0): We determined that '
+                                 + str(BL_AVG_README_LINKS)
+                                 + ' or more links are best. We found '
+                                 + str(avg_readme_links)
+                                 + ' links (in average) in the ReadMe file(s)')
 
         if avg_readme_links > 0:
             pct_not_acc_links = analysis_result[7]
             pct_acc_links = 100 - pct_not_acc_links
             pct_acc_links_value = range_normalization(pct_acc_links, 0, 100, 0, 1) * pct_acc_links_weight
 
-            sc_feedback.append('\tSub-value for ReadMe: % of links accessible rating (score: '
-                               + str(round(pct_acc_links_value / pct_acc_links_weight, 2))
-                               + ' out of 1.0): We expect 100% of them to be accessible. We found '
-                               + str(pct_acc_links)
-                               + '% accessible links in the ReadMe file(s).')
+            sc_feedback_queue.append('- % of links accessible rating (score: '
+                                     + str(round(pct_acc_links_value / pct_acc_links_weight, 2))
+                                     + ' out of 1.0): We expect 100% of them to be accessible. We found '
+                                     + str(pct_acc_links)
+                                     + '% accessible links in the ReadMe file(s).')
         else:
             pct_acc_links_value = 0
 
@@ -202,13 +204,15 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
 
         normalized_readme_value = range_normalization(all_readme_values, 0, max_readme_value, 0, 1)
 
-        sc_feedback.append('\n\t2. ReadMe overall rating (score: '
+        sc_feedback.append('2. ReadMe overall rating (score: '
                            + str(round(normalized_readme_value, 2))
                            + ' out of 1.0): See sub-ratings for more information.\n')
+
+        sc_feedback.extend(sc_feedback_queue)
         return normalized_readme_value
     # if no readme
     else:
-        sc_feedback.append('\t2. ReadMe rating (score: 0 out of 1.0): No ReadMe file(s) found. '
+        sc_feedback.append('2. ReadMe rating (score: 0 out of 1.0): No ReadMe file(s) found. '
                            'You should add one to document your repository. We expect from a good ReadMe to have '
                            + str(BL_AVG_README_LINES)
                            + ' lines. Make sure to also add useful links e.g. a paper link. We determined that '
@@ -241,7 +245,7 @@ def software_environment_feedback(analysis_result):
             pct_mentioned_to_all_used_val = 1
             pct_strict_imports_in_config_val = 1
 
-            se_feedback.append('\tWe found no library imports in the source code. Therefore the rating of the config '
+            se_feedback.append('We found no library imports in the source code. Therefore the rating of the config '
                                'file will be 1.0 out of 1.0 no matter what is inside as none of the defined libraries '
                                'are used.')
 
@@ -250,7 +254,7 @@ def software_environment_feedback(analysis_result):
             nbr_imports_in_config_val = range_normalization(nbr_imports_in_config, 0, nbr_imports_in_sc, 0, 1) \
                                         * nbr_config_imports_weight
 
-            se_feedback.append('\t1. Number of libraries in config file(s) rating (score: '
+            se_feedback.append('1. Number of libraries in config file(s) rating (score: '
                                + str(round(nbr_imports_in_config_val / nbr_config_imports_weight, 2))
                                + ' out of 1.0): We expect all of the in the source-code used libraries to be '
                                  'mentioned. We found '
@@ -263,7 +267,7 @@ def software_environment_feedback(analysis_result):
             pct_mentioned_to_all_used_val = range_normalization(pct_mentioned_to_all_used, 0, 100, 0, 1) \
                                             * pct_mentioned_to_all_used_weight
 
-            se_feedback.append('\n\t2. Percentage of libraries in config file(s) who are also used in the source-code '
+            se_feedback.append('2. Percentage of libraries in config file(s) who are also used in the source-code '
                                'in relation to all used in the source-code file(s) rating (score: '
                                + str(round(pct_mentioned_to_all_used_val / pct_mentioned_to_all_used_weight, 2))
                                + ' out of 1.0): We found that '
@@ -273,9 +277,9 @@ def software_environment_feedback(analysis_result):
                                  ' defined in the config file(s). More are useless but not harmful.\n')
 
             pct_strict_imports_in_config_val = range_normalization(pct_strict_imports_in_config, 0, 100, 0, 1) \
-                                                * pct_strict_config_imports_weight
+                                               * pct_strict_config_imports_weight
 
-            se_feedback.append('\n\t3. Percentage of strict defined libraries in config file(s) rating (score: '
+            se_feedback.append('3. Percentage of strict defined libraries in config file(s) rating (score: '
                                + str(round(pct_strict_imports_in_config_val / pct_strict_config_imports_weight, 2))
                                + ' out of 1.0): We expect all of the defined libraries in the config file(s) to be '
                                  'strictly (==) defined. We found '
@@ -289,27 +293,27 @@ def software_environment_feedback(analysis_result):
 
         software_env_value = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
 
-        se_feedback.append('\tSoftware environment is calculated from the above identifiers. '
+        se_feedback.append('> Software environment is calculated from the above identifiers. '
                            'Since these have a different influence on the overall result, they are weighted as '
                            'follows:\n\n'
-                           + '\tNumber of config imports weight: ' + str(nbr_config_imports_weight) + '\n'
-                           + '\tStrict config imports weight: ' + str(pct_strict_config_imports_weight) + '\n'
-                           + '\tImports in config in relation to all in source-code weight: '
+                           + '- Number of config imports weight: ' + str(nbr_config_imports_weight) + '\n'
+                           + '- Strict config imports weight: ' + str(pct_strict_config_imports_weight) + '\n'
+                           + '- Imports in config in relation to all in source-code weight: '
                            + str(pct_mentioned_to_all_used_weight))
 
-        factor_result.append('\tSoftware environment: ' + str(software_env_value))
+        factor_result.append('Software environment: ' + str(software_env_value))
 
         return software_env_value
     else:
         software_env_value = 0
 
-        se_feedback.append('\tSoftware environment rating (score: 0 out of 1.0): No Config file(s) found. '
+        se_feedback.append('Software environment rating (score: 0 out of 1.0): No Config file(s) found. '
                            'You should add one (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in order '
                            'for others to reproduce your repository with the same software '
                            'environment. We expect from a good config file to strictly specify all library versions '
                            'and to cover all of the used libraries used in the source code.)')
 
-        factor_result.append('\tSoftware environment: ' + str(software_env_value))
+        factor_result.append('Software environment: ' + str(software_env_value))
         return software_env_value
 
 
@@ -322,7 +326,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
     # dataset file candidates (if 0 -> 0 overall)
     dataset_file_candidates = analysis_result[34]
     if dataset_file_candidates == 0:
-        ds_feedback.append('\tDataset availability and documentation rating (score: 0 out of 1.0): '
+        ds_feedback.append('Dataset availability and documentation rating (score: 0 out of 1.0): '
                            'No dataset file candidate(s) found. If you have provided a dataset in your repository '
                            'move it in a folder named "data" or rename the dataset with "data" in name.'
                            ' You should always provide a dataset (if possible) in the repository '
@@ -338,7 +342,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                                       * candidates_weight
 
         # TODO: edit message when baseline val is clear.
-        ds_feedback.append('\t1. Dataset file candidates rating (score: '
+        ds_feedback.append('1. Dataset file candidates rating (score: '
                            + str(round(dataset_file_candidates_val / candidates_weight, 2))
                            + ' out of 1.0): We found '
                            + str(dataset_file_candidates)
@@ -351,7 +355,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
 
         # TODO: edit message when baseline val is clear.
         # how many dataset file candidates were mentioned in the source code
-        ds_feedback.append('\n\t2. Dataset file candidates in source code rating (score: '
+        ds_feedback.append('2. Dataset file candidates in source code rating (score: '
                            + str(round(ds_file_candidates_mentioned_in_sc_val / mentioned_weight, 2))
                            + ' out of 1.0): Of the '
                            + str(dataset_file_candidates)
@@ -365,22 +369,22 @@ def dataset_availability_preprocessing_feedback(analysis_result):
         pct_ds_candidates_mentioned_to_all_found_val = range_normalization(pct_ds_candidates_mentioned_to_all_found,
                                                                            0, 100, 0, 1) * pct_mentioned_found_weight
 
-        ds_feedback.append('\n\t3. Percentage of mentioned to all found dataset file candidates rating (score: '
+        ds_feedback.append('3. Percentage of mentioned to all found dataset file candidates rating (score: '
                            + str(round(pct_ds_candidates_mentioned_to_all_found_val / pct_mentioned_found_weight, 2))
                            + ' out of 1.0): '
                            + str(pct_ds_candidates_mentioned_to_all_found)
                            + '% of the found dataset file candidates were mentioned in the source-code.\n')
 
-        ds_feedback.append('\tImportant note: If you have provided a dataset in your repository but this tool has not '
+        ds_feedback.append('> Important note: If you have provided a dataset in your repository but this tool has not '
                            'detected it, move it in a folder named "data" or rename the dataset with "data" in name.\n')
 
-        ds_feedback.append('\tDataset availability and preprocessing is calculated from the above identifiers. '
+        ds_feedback.append('Dataset availability and preprocessing is calculated from the above identifiers. '
                            'Since these have a different influence on the overall result, they are weighted as '
                            'follows:\n\n'
-                           + '\tNumber of dataset file candidates weight: ' + str(candidates_weight) + '\n'
-                           + '\tMentioned dataset file candidates in source-code weight: ' + str(mentioned_weight)
+                           + '- Number of dataset file candidates weight: ' + str(candidates_weight) + '\n'
+                           + '- Mentioned dataset file candidates in source-code weight: ' + str(mentioned_weight)
                            + '\n'
-                           + '\tDataset file candidates found in source-code in relation to all found weight: '
+                           + '- Dataset file candidates found in source-code in relation to all found weight: '
                            + str(pct_mentioned_found_weight))
 
         max_value = candidates_weight + mentioned_weight + pct_mentioned_found_weight
@@ -388,7 +392,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                        + pct_ds_candidates_mentioned_to_all_found_val
 
         dataset_val = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
-        factor_result.append('\tDataset availability and preprocessing: ' + str(dataset_val))
+        factor_result.append('Dataset availability and preprocessing: ' + str(dataset_val))
 
         return dataset_val
 
@@ -406,7 +410,7 @@ def random_seed_feedback(analysis_result):
         pct_fixed_rdm_seed_lines_val = range_normalization(pct_fixed_rdm_seed_lines, 0, 100, 0, 1)
         random_seed_val = round(pct_fixed_rdm_seed_lines_val, 2)
 
-        rs_feedback.append('\tPercentage of random seed lines with fixed seed rating (score: '
+        rs_feedback.append('Percentage of random seed lines with fixed seed rating (score: '
                            + str(random_seed_val)
                            + ' out of 1.0): We found that '
                            + str(pct_fixed_rdm_seed_lines)
@@ -415,13 +419,13 @@ def random_seed_feedback(analysis_result):
                            + ' found random seed declaration lines had a fixed seed. If the value is not 100% make '
                              'sure to fix the random seeds.')
     else:
-        rs_feedback.append('\tRandom seed rating (score: 1 out of 1.0): '
+        rs_feedback.append('Random seed rating (score: 1 out of 1.0): '
                            'No random seed declaration(s) found in the source-code. This results in the best score, '
                            'as we assume that no randomness regarding the test/train-split is involved in that case. '
                            'If you have declared a random seed but we were not able to detect it, make sure to fix the '
                            'value of it in order for others to use the same seed.')
 
-    factor_result.append('\tRandom seed: ' + str(random_seed_val))
+    factor_result.append('Random seed: ' + str(random_seed_val))
     return random_seed_val
 
 
@@ -430,19 +434,19 @@ def model_serialization_feedback(analysis_result):
     ms_val = 0
     if ms_used == 'Yes':
         ms_val = 1
-        ms_feedback.append('\tModel serialization rating (score: 1.0 out of 1.0): '
+        ms_feedback.append('Model serialization rating (score: 1.0 out of 1.0): '
                            'Model serialization artefacts found. Model serialization helps in the field of machine '
                            'learning, where incremental improvements should be documented in order for others to '
                            'understand the steps taken.')
     else:
-        ms_feedback.append('\tModel serialization rating (score: 0 out of 1.0): '
+        ms_feedback.append('Model serialization rating (score: 0 out of 1.0): '
                            'No model serialization artefacts found. We look out for a .dvc folder in order to '
                            'determine whether or not model serialization has been used. If you have used it move the '
                            'corresponding artefacts in a .dvc folder. If you have not used it, consider doing so. '
                            'Model serialization helps in the field of machine learning, where incremental improvements '
                            'should be documented in order for others to understand the steps taken.')
 
-    factor_result.append('\tModel serialization: ' + str(ms_val))
+    factor_result.append('Model serialization: ' + str(ms_val))
     return ms_val
 
 
@@ -454,7 +458,7 @@ def hyperparameter_feedback(analysis_result):
     if nbr_hp_indicators > 0:
         hp_val = round(range_normalization(nbr_hp_indicators, 0, BL_NMB_HP_IND, 0, 1), 2)
 
-        hp_feedback.append('\tHyperparameter declaration rating (score: '
+        hp_feedback.append('Hyperparameter declaration rating (score: '
                            + str(hp_val)
                            + ' out of 1.0): We found '
                            + str(nbr_hp_indicators)
@@ -462,11 +466,11 @@ def hyperparameter_feedback(analysis_result):
                              'We determined that '
                            + str(BL_NMB_HP_IND)
                            + ' hyperparameter declaration indicators are a good value.'
-                           ' Documenting changes of the hyperparameters helps in the field of machine learning, '
-                           'where incremental improvements should be documented in order for others to understand '
-                           'the steps taken.')
+                             ' Documenting changes of the hyperparameters helps in the field of machine learning, '
+                             'where incremental improvements should be documented in order for others to understand '
+                             'the steps taken.')
     else:
-        hp_feedback.append('\tHyperparameter declaration rating (score: 0 out of 1.0): '
+        hp_feedback.append('Hyperparameter declaration rating (score: 0 out of 1.0): '
                            'No hyperparameter declarations found. We look out for imports of the following libraries '
                            'in the source code: "wandb", "neptune", "kubeflow" and "sacred". These libraries enable '
                            'the logging of these parameters in order to document them. '
@@ -474,7 +478,7 @@ def hyperparameter_feedback(analysis_result):
                            'where incremental improvements should be documented in order for others to understand '
                            'the steps taken.')
 
-    factor_result.append('\tHyperparameter declaration: ' + str(hp_val))
+    factor_result.append('Hyperparameter declaration: ' + str(hp_val))
     return hp_val
 
 
@@ -484,7 +488,7 @@ def out_of_the_box_buildability_feedback(analysis_result):
     # TODO: user feedback on how to improve (if necessary)
     if ootb_buildable == 'BinderHub not reachable':
         binderhub_val = 0
-        bh_feedback.append('\tOut-of-the-box buildability rating (score: 0 out of 1.0): '
+        bh_feedback.append('Out-of-the-box buildability rating (score: 0 out of 1.0): '
                            'Tested building the repository with BinderHub was not successful because the provided '
                            'BinderHub URL was not reachable. If you have no access to your own BinderHub deployment '
                            'you can use the free and publicly available infrastructure accessible under '
@@ -495,14 +499,14 @@ def out_of_the_box_buildability_feedback(analysis_result):
     # if repo build with BinderHub successful
     elif ootb_buildable == 'Yes':
         binderhub_val = 1
-        bh_feedback.append('\tOut-of-the-box buildability rating (score: 1.0 out of 1.0): '
+        bh_feedback.append('Out-of-the-box buildability rating (score: 1.0 out of 1.0): '
                            'Tested building the repository with BinderHub was successful. This greatly helps '
                            'reproducing the found results. You can use the free and publicly available infrastructure '
                            'accessible under https://www.mybinder.org to generate a Binder Badge which you should '
                            'include in your ReadMe.')
     else:
         binderhub_val = 0
-        bh_feedback.append('\tOut-of-the-box buildability rating (score: 0 out of 1.0): '
+        bh_feedback.append('Out-of-the-box buildability rating (score: 0 out of 1.0): '
                            'Tested building the repository with BinderHub resulted in an error. Repository is not '
                            'buildable with BinderHub. Please try fixing this, as it greatly helps reproducing the '
                            'found results. You can use the free and publicly available infrastructure accessible under '
@@ -510,7 +514,7 @@ def out_of_the_box_buildability_feedback(analysis_result):
                            'it may not be compatible with BinderHub. '
                            'Check: https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html')
 
-    factor_result.append('\tOut-of-the-box buildability: ' + str(binderhub_val))
+    factor_result.append('Out-of-the-box buildability: ' + str(binderhub_val))
     return binderhub_val
 
 
@@ -529,28 +533,31 @@ def range_normalization(input_value, min_value, max_value, min_range, max_range)
 
 def build_feedback_file(file_path):
     feedback_txt = open(file_path, "w")
-    feedback_txt.write('REPRODUCIBILITY FACTOR RATING (from 0 to 1): \n\n')
+    feedback_txt.write('# REPRODUCIBILITY FACTOR RATING (from 0 to 1): \n\n')
+    table = '| Reproducibility factor | Rating |\n| ----------- | ----------- |\n'
     for element in factor_result:
-        feedback_txt.write(str(element) + "\n")
-    feedback_txt.write('\n\nSOURCE CODE AVAILABILITY AND DOCUMENTATION FEEDBACK\n\n')
+        elements = element.split(':')
+        table = table + '| ' + str(elements[0]) + ' | ' + str(elements[1]) + ' |\n'
+    feedback_txt.write(table)
+    feedback_txt.write('\n\n## SOURCE CODE AVAILABILITY AND DOCUMENTATION FEEDBACK\n\n')
     for element in sc_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nSOFTWARE ENVIRONMENT FEEDBACK\n\n')
+    feedback_txt.write('\n\n## SOFTWARE ENVIRONMENT FEEDBACK\n\n')
     for element in se_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nDATASET AVAILABILITY AND PREPROCESSING FEEDBACK\n\n')
+    feedback_txt.write('\n\n## DATASET AVAILABILITY AND PREPROCESSING FEEDBACK\n\n')
     for element in ds_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nRANDOM SEED FEEDBACK\n\n')
+    feedback_txt.write('\n\n## RANDOM SEED FEEDBACK\n\n')
     for element in rs_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nMODEL SERIALIZATION FEEDBACK\n\n')
+    feedback_txt.write('\n\n## MODEL SERIALIZATION FEEDBACK\n\n')
     for element in ms_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nHYPERPARAMETER DECLARATION FEEDBACK\n\n')
+    feedback_txt.write('\n\n## HYPERPARAMETER DECLARATION FEEDBACK\n\n')
     for element in hp_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\nOUT-OF-THE-BOX BUILDABILITY FEEDBACK\n\n')
+    feedback_txt.write('\n\n## OUT-OF-THE-BOX BUILDABILITY FEEDBACK\n\n')
     for element in bh_feedback:
         feedback_txt.write(element + "\n")
     feedback_txt.close()
