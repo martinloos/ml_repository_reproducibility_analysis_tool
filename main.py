@@ -121,7 +121,7 @@ def main(argv):
             logger.info("Started analysis for README file(s) ...")
 
             if filter_repository_artefacts.get_readme():
-                # readme_analysis.analyse_readme(verbose)
+                readme_analysis.analyse_readme(verbose)
                 logger.info("Finished analysis for README file(s).")
             else:
                 # if no readmes are detected/present
@@ -134,23 +134,24 @@ def main(argv):
             logger.info("Started analysis for LICENSE file(s) ...")
 
             if filter_repository_artefacts.get_license():
-                # license_analysis.analyse_license(verbose)
+                license_analysis.analyse_license(verbose)
                 logger.info("Finished analysis for LICENSE file(s).")
             else:
                 # if no licenses are detected/present
                 logger.warning('No license file(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No license(s) detected.[/bold red]')
 
-            if filter_repository_artefacts.get_dataset_folders():
-                # dataset_analysis.analyse_datasets()
+            if filter_repository_artefacts.get_dataset_folders() or filter_repository_artefacts.get_files_name_data():
+                dataset_analysis.analyse_datasets()
                 logger.info("Finished analysis of possible dataset files(s).")
             else:
                 # if no dataset folder(s) are detected/present
                 logger.warning('No dataset folder(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No dataset folder(s) detected.[/bold red]')
 
+            logger.info("Started source code file(s) analysis ...")
             if filter_repository_artefacts.get_source_code_files():
-                # source_code_analysis.analyze_source_code(verbose)
+                source_code_analysis.analyze_source_code(verbose)
                 logger.info("Finished analysis for source code file(s).")
             else:
                 # if no source code files are detected/present
@@ -161,7 +162,7 @@ def main(argv):
             dataset_analysis.build_dataset_response(verbose)
 
             if filter_repository_artefacts.get_config_files():
-                # config_files_analysis.analyse_config_files(verbose)
+                config_files_analysis.analyse_config_files(verbose)
                 logger.info("Finished analysis for config file(s).")
             else:
                 # if no config files are detected/present
@@ -187,7 +188,8 @@ def main(argv):
             result_builder.build_result(repository_url, output_file)
             # builds feedback for each factor
             # TODO: implement feedback builder
-            feedback_builder.build_feedback()
+            feedback_file_path = csv_path + 'feedback-' + csv_name + '.txt'
+            feedback_builder.build_feedback(feedback_file_path)
             print('\n:thumbs_up: [bold green]Finished repository reproducibility analysis.[/bold green]\n')
         elif opt not in ('-v', '--verbose'):
             logger.error('Use "python3 main.py -h" for help test')
