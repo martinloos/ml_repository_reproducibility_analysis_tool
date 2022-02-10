@@ -14,6 +14,7 @@ logger = logging.getLogger('log')
 
 reg = re.compile("(((.+)?data(.+)?)|((.+)?im(a)?g))")
 dataset_folders = []
+files_name_data = []
 dvc_folder = []
 
 accepted_files = {'readme', 'requirements', 'config.yml', 'config.yaml', 'conda.env', 'license', 'dockerfile'}
@@ -56,6 +57,8 @@ def get_relevant_artefacts(local_repo_dir_path, verbose):
             # start byte
             if '.doctree' not in file_name:
                 repo_license.append(f)
+        elif 'data' in file_name:
+            files_name_data.append(f)
         elif '.dockerignore' not in file_name:
             if bool(re.match(config_file_reg, file_name)):
                 config_files.append(f)
@@ -144,6 +147,10 @@ def get_license():
 
 def get_dataset_folders():
     return dataset_folders
+
+
+def get_files_name_data():
+    return files_name_data
 
 
 def get_config_files():
