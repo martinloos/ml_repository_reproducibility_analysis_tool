@@ -188,7 +188,7 @@ def main(argv):
             result_builder.build_result(repository_url, output_file)
             # builds feedback for each factor
             # TODO: implement feedback builder
-            feedback_file_path = csv_path + 'feedback-' + csv_name + '.txt'
+            feedback_file_path = csv_path + 'feedback-' + csv_name + '.md'
             feedback_builder.build_feedback(feedback_file_path)
             print('\n:thumbs_up: [bold green]Finished repository reproducibility analysis.[/bold green]\n')
         elif opt not in ('-v', '--verbose'):
