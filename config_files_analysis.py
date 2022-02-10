@@ -44,8 +44,6 @@ def retrieve_all_config_imports():
 
     for file in config_files:
         file_name = file[0].lower()
-        print('config file name: ')
-        print(file_name)
         file_path = file[1]
 
         config_lines = []
