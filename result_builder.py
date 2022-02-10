@@ -79,6 +79,8 @@ def create_csv_file(output_file):
         csv_header = make_csv_header()
         write_list_to_csv(csv_header, output_file)
 
+    print('\nWrote result to ' + output_file + '\n')
+
 
 def make_csv_header():
     return ['repository_url', '# readmes', 'total readme lines', 'average readme lines', '# readme links',
