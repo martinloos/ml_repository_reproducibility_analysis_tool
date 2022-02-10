@@ -25,6 +25,8 @@ def call_binderhub_to_build(repo_owner, repo_name):
 
     print('[bold green]Testing if binderhub reachable ...[/bold green]\n')
 
+    ootb_buildable = 'No'
+
     if 'http' in BINDERHUB_BASE_URL:
         binderhub_url = BINDERHUB_BASE_URL.split('/', 3)[2]
     else:
@@ -43,6 +45,7 @@ def call_binderhub_to_build(repo_owner, repo_name):
         print('\n[bold green]Binderhub reachable. Starting build call.[/bold green]\n')
     else:
         print('\n:pile_of_poo: [bold red]Binderhub not reachable. Check base url: [/bold red]' + binderhub_url + '\n')
+        ootb_buildable = 'BinderHub not reachable'
 
     # if Dockerfile present: Binder expects very specific use of it check documentation
     # otherwise it's very likely that the container will crash
@@ -52,7 +55,6 @@ def call_binderhub_to_build(repo_owner, repo_name):
                 url]
 
     rate_limit_exceeded = 0
-    build_successful = 0
 
     while (rate_limit_exceeded == 0) & (binderhub_reachable == 1):
         cmd = subprocess.Popen(commands, stdout=subprocess.PIPE)
@@ -81,15 +83,12 @@ def call_binderhub_to_build(repo_owner, repo_name):
                             print('Url: ' + url + ' Token: ' + token + '\n')
                             rate_limit_exceeded = 1
                             build_successful = 1
+                            ootb_buildable = 'Yes'
                         elif data['phase'] == 'failed':
                             msg = (data['message']).replace('\n', '')
                             print('\n:pile_of_poo: [bold red]Failed with message: [/bold red]'
                                   + msg + '\n')
                             rate_limit_exceeded = 1
-
-    ootb_buildable = 'No'
-
-    if build_successful == 1:
-        ootb_buildable = 'Yes'
+                            ootb_buildable = 'No'
 
     result.append(ootb_buildable)
