@@ -5,14 +5,14 @@ import python_source_code_analysis
 from rich import print
 from rich.console import Console
 from rich.table import Table
+import logging
+
 import dataset_analysis
 
+logger = logging.getLogger('log')
 source_code_file_results = []
-
 source_code_analysis_result = []
-
 unique_imports = []
-
 mentioned_dataset_files = []
 
 # TODO: doc
@@ -25,14 +25,19 @@ mentioned_dataset_files = []
 def analyze_source_code(verbose):
     source_code_files = filter_repository_artefacts.get_source_code_files()
     dataset_file_candidates = dataset_analysis.get_dataset_file_candidates()
+    counter = 1
+
     for file in source_code_files:
         file_name = file[0]
         file_path = file[1]
+        logger.info('Processing source code file ' + str(counter) + ' out of ' + str(len(source_code_files))
+                    + ' (' + file_name + ')')
         # add other elif clause to support other source code types
         if 'py' in file_name:
             sc_analysis_result = python_source_code_analysis.python_code_analysis(file_name, file_path,
                                                                                   dataset_file_candidates, verbose)
             source_code_file_results.append(sc_analysis_result)
+        counter = counter + 1
 
     build_source_code_result()
 
@@ -111,8 +116,11 @@ def build_source_code_result():
     percentage_comment_lines = calculate_percentage(total_comment_lines, total_sc_lines)
     average_pylint_score = round(weighted_pylint_sum / total_sc_lines, 2)
 
-    # > 1 means there is more code than comments
-    code_comment_ratio = round(total_code_lines / total_comment_lines, 2)
+    # > 1 means there is more code lines than comment lines
+    if total_comment_lines > 0:
+        code_comment_ratio = round(total_code_lines / total_comment_lines, 2)
+    else:
+        code_comment_ratio = total_code_lines
 
     average_jn_header_comment = 0
     average_jn_footer_comment = 0
