@@ -44,17 +44,35 @@ def retrieve_all_config_imports():
 
     for file in config_files:
         file_name = file[0].lower()
+        print('config file name: ')
+        print(file_name)
         file_path = file[1]
 
         config_lines = []
+        error = 0
 
-        with open(file_path, "rb") as config_text:
-            conf_text_lines = config_text.read()
-            # thanks to https://stackoverflow.com/questions/67734203/reading-a-txt-and-getting-weird-behavior
-            dec_lines = conf_text_lines.decode('utf-16le', 'ignore')
-            dec_llist = dec_lines.split('\n')
-            for line in dec_llist:
-                config_lines.append(line.lower())
+        # e.g. https://github.com/KristiyanVachev/Leaf-Question-Generation will throw UnicodeDecodeError
+        # but works with other solution whereas https://github.com/dmitrijsk/AttentionHTR works with the first
+        # solution better (most repos work with the first one already, so the other is just a backup solution)
+        try:
+            config_text = open(file_path, "r")
+            config_read = config_text.readlines()
+            config_text.close()
+            for line in config_read:
+                config_lines.append(line.lower().replace('\n', ''))
+        except UnicodeDecodeError:
+            error = 1
+
+        if error == 1:
+            with open(file_path, "rb") as config_text:
+                conf_text_lines = config_text.read()
+                print('config file line: ')
+                print(conf_text_lines)
+                # thanks to https://stackoverflow.com/questions/67734203/reading-a-txt-and-getting-weird-behavior
+                dec_lines = conf_text_lines.decode('utf-16le', 'ignore')
+                dec_llist = dec_lines.split('\n')
+                for line in dec_llist:
+                    config_lines.append(line.lower())
 
         # requirements
         if 'requirements' in file_name:
@@ -77,8 +95,6 @@ def retrieve_all_config_imports():
 # and: https://github.com/tirthajyoti/Machine-Learning-with-Python/blob/master/Deployment
 # /Linear_regression/requirements.txt
 def retrieve_imports_from_requirements(config_lines):
-    print('all config lines from requirements')
-    print(config_lines)
     for line in config_lines:
         line = line.replace('\n', '').replace(' ', '').replace('\\', '')
         if not (line.startswith('#') or line.startswith('-')):
