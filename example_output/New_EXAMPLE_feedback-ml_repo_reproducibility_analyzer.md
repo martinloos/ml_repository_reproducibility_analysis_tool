@@ -60,7 +60,7 @@
 
 > Important note: If you have provided a dataset in your repository but this tool has not detected it, move it in a folder named "data" or rename the dataset with "data" in name.
 
-Dataset availability and preprocessing is calculated from the above identifiers. Since these have a different influence on the overall result, they are weighted as follows:
+> Dataset availability and preprocessing is calculated from the above identifiers. Since these have a different influence on the overall result, they are weighted as follows:
 
 - Number of dataset file candidates weight: 1
 - Mentioned dataset file candidates in source-code weight: 1
