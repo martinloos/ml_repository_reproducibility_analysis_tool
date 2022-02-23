@@ -233,9 +233,6 @@ def compare_config_imp_with_sc_imp():
         elif imp_tmp not in used_and_in_config:
             used_and_in_config.append(imp)
 
-# 4 check if imports are all public available
-# TODO: Ideas on how to do that
-
 
 def calculate_percentage(value1, value2):
     return round(100 * float(value1) / float(value2), 2)
