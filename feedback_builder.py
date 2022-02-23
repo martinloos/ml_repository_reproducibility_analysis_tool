@@ -51,26 +51,26 @@ def build_feedback(feedback_file_path):
 
 def source_code_availability_documentation_feedback(analysis_result):
     # first we define the weights of all indicators
-    # change if you want to make the indicator more/less impactful
-    total_license_weight = 1
-    total_readme_weight = 1
-    avg_readme_length_weight = 2
-    avg_readme_links_weight = 0.5
-    pct_acc_links_weight = 0.5
-    avg_pylint_score_weight = 0.5
-    code_comment_ratio_weight = 1
+    # all weights must add up to 1
+    total_license_weight = 0.1
+    total_readme_weight = 0.4
+    avg_readme_length_weight = 0.7
+    avg_readme_links_weight = 0.2
+    pct_acc_links_weight = 0.1
+    avg_pylint_score_weight = 0.2
+    code_comment_ratio_weight = 0.3
 
     # processing license
     nbr_licenses = analysis_result[8]
     # ranging from 0 to nbr_licenses
     nbr_os_licenses = analysis_result[9]
     license_value = calculate_license_value(nbr_licenses, nbr_os_licenses)
-    weighted_license_value = license_value * total_license_weight
+    weighted_license_value = round(license_value * total_license_weight, 2)
 
     # processing readme
     readme_value = calculate_readme_value(analysis_result, avg_readme_length_weight, avg_readme_links_weight,
                                           pct_acc_links_weight)
-    weighted_readme_value = readme_value * total_readme_weight
+    weighted_readme_value = round(readme_value * total_readme_weight, 2)
 
     # processing pylint scoring
     # should be more generalised for other source code types
@@ -84,7 +84,7 @@ def source_code_availability_documentation_feedback(analysis_result):
                        + str(round(avg_pylint_score, 2))
                        + ' where 10.0 is best. We found that readable code is best for reproducibility.\n')
 
-    weighted_pylint_value = pylint_value * avg_pylint_score_weight
+    weighted_pylint_value = round(pylint_value * avg_pylint_score_weight, 2)
 
     # processing code comment ratio
     # for code comment ratio: > BL bad but < BL also bad should be value approx = BL
@@ -94,18 +94,13 @@ def source_code_availability_documentation_feedback(analysis_result):
     # less code lines per comment line (usually) means better explanation
     code_comment_ratio_value = (1 - range_normalization(code_comment_ratio, BL_CODE_COMMENT_RATIO,
                                                         5 * BL_CODE_COMMENT_RATIO, 0, 1))
-    weighted_code_comment_ratio_value = code_comment_ratio_value * code_comment_ratio_weight
+    weighted_code_comment_ratio_value = round(code_comment_ratio_value * code_comment_ratio_weight, 2)
 
     sc_feedback.append('4. Source-code-comment-ratio rating (score: '
                        + str(round(code_comment_ratio_value, 2))
                        + ' out of 1.0): We determined '
                        + str(BL_CODE_COMMENT_RATIO)
                        + ' as best ratio. But more comments are good too. Well documented code is important.\n')
-
-    # as all values are ranging from 0 to 1 the max value for each entry is 1 * corresponding weight
-    max_value = total_readme_weight + total_license_weight + avg_pylint_score_weight + code_comment_ratio_weight
-    actual_value = weighted_license_value + weighted_readme_value + weighted_pylint_value \
-                   + weighted_code_comment_ratio_value
 
     sc_feedback.append('> Source-code availability and documentation is calculated from the above identifiers. '
                        'Since these have a different influence on the overall result, they are weighted as follows:\n\n'
@@ -117,27 +112,28 @@ def source_code_availability_documentation_feedback(analysis_result):
                        + '- Pylint weight: ' + str(avg_pylint_score_weight) + '\n'
                        + '- Code-comment-ratio weight: ' + str(code_comment_ratio_weight))
 
-    sc_availability_documentation_value = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
+    sc_availability_documentation_value = round(weighted_license_value + weighted_readme_value + weighted_pylint_value \
+                                          + weighted_code_comment_ratio_value, 2)
     factor_result.append('Source-code availability and documentation: ' + str(sc_availability_documentation_value))
     return sc_availability_documentation_value
 
 
 def calculate_license_value(nbr_licenses, nbr_os_licenses):
-    normalized_license_value = range_normalization(nbr_os_licenses, 0, nbr_licenses, 0, 1)
+    normalized_license_value = round(range_normalization(nbr_os_licenses, 0, nbr_licenses, 0, 1), 2)
 
     if nbr_licenses == 0:
         sc_feedback.append('1. License rating (score: '
-                           + str(round(normalized_license_value, 2))
+                           + str(normalized_license_value)
                            + ' out of 1.0): No license information found. Providing a licenses helps others to tell if '
                              'your project and its dependencies are available to them.\n')
     elif nbr_os_licenses == 0:
         sc_feedback.append('1. License rating (score: '
-                           + str(round(normalized_license_value, 2))
+                           + str(normalized_license_value)
                            + ' out of 1.0): All found licenses are not open-source. Using open-source dependencies '
                              'enables others to use them also.\n')
     elif nbr_licenses != nbr_os_licenses:
         sc_feedback.append('1. License rating (score: '
-                           + str(round(normalized_license_value, 2))
+                           + str(normalized_license_value)
                            + ' out of 1.0): '
                            + str((nbr_licenses - nbr_os_licenses))
                            + ' of the '
@@ -146,7 +142,7 @@ def calculate_license_value(nbr_licenses, nbr_os_licenses):
                              'use them also.\n')
     else:
         sc_feedback.append('1. License rating (score: '
-                           + str(round(normalized_license_value, 2))
+                           + str(normalized_license_value)
                            + ' out of 1.0): All found licenses are open-source.\n')
 
     return normalized_license_value
@@ -161,8 +157,8 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
 
     if nbr_readmes > 0:
         avg_readme_length = analysis_result[3]
-        avg_readme_length_value = range_normalization(avg_readme_length, 0, BL_AVG_README_LINES, 0,
-                                                      1) * avg_length_weight
+        avg_readme_length_value = round(range_normalization(avg_readme_length, 0, BL_AVG_README_LINES, 0,
+                                                      1) * avg_length_weight, 2)
 
         sc_feedback_queue.append('- Average length rating (score: '
                                  + str(round(avg_readme_length_value / avg_length_weight, 2))
@@ -173,7 +169,8 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
                                  + ' lines (in average) in the ReadMe file(s)')
 
         avg_readme_links = analysis_result[4] / nbr_readmes
-        avg_readme_links_value = range_normalization(avg_readme_links, 0, BL_AVG_README_LINKS, 0, 1) * avg_links_weight
+        avg_readme_links_value = round(range_normalization(avg_readme_links, 0, BL_AVG_README_LINKS, 0, 1)
+                                       * avg_links_weight, 2)
 
         sc_feedback_queue.append('- Average links rating (score: '
                                  + str(round(avg_readme_links_value / avg_links_weight, 2))
@@ -186,7 +183,7 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
         if avg_readme_links > 0:
             pct_not_acc_links = analysis_result[7]
             pct_acc_links = 100 - pct_not_acc_links
-            pct_acc_links_value = range_normalization(pct_acc_links, 0, 100, 0, 1) * pct_acc_links_weight
+            pct_acc_links_value = round(range_normalization(pct_acc_links, 0, 100, 0, 1) * pct_acc_links_weight, 2)
 
             sc_feedback_queue.append('- % of links accessible rating (score: '
                                      + str(round(pct_acc_links_value / pct_acc_links_weight, 2))
@@ -196,20 +193,14 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
         else:
             pct_acc_links_value = 0
 
-        # as all values are ranging from 0 to 1 the max value for each entry is 1 * corresponding weight
-        max_readme_value = avg_length_weight + avg_links_weight + pct_acc_links_weight
-
-        all_readme_values = avg_readme_length_value + avg_readme_links_value \
-                            + pct_acc_links_value
-
-        normalized_readme_value = range_normalization(all_readme_values, 0, max_readme_value, 0, 1)
+        readme_value = avg_readme_length_value + avg_readme_links_value + pct_acc_links_value
 
         sc_feedback.append('2. ReadMe overall rating (score: '
-                           + str(round(normalized_readme_value, 2))
+                           + str(round(readme_value, 2))
                            + ' out of 1.0): See sub-ratings for more information.\n')
 
         sc_feedback.extend(sc_feedback_queue)
-        return normalized_readme_value
+        return readme_value
     # if no readme
     else:
         sc_feedback.append('2. ReadMe rating (score: 0 out of 1.0): No ReadMe file(s) found. '
@@ -224,22 +215,24 @@ def calculate_readme_value(analysis_result, avg_length_weight, avg_links_weight,
 
 
 def software_environment_feedback(analysis_result):
-    nbr_config_imports_weight = 1
-    pct_strict_config_imports_weight = 1
-    pct_mentioned_to_all_used_weight = 1
+    # weights added up must be 1
+    nbr_config_imports_weight = 0.2
+    pct_strict_config_imports_weight = 0.2
+    pct_mentioned_to_all_used_weight = 0.4
+    pct_public_source_code_imports_weight = 0.2
 
-    nbr_config_files = analysis_result[25]
+    nbr_config_files = analysis_result[26]
     # TODO: replace this value with baseline (how many imports in config are normal for reproducible repos)
-    nbr_imports_in_sc = analysis_result[28]
+    nbr_imports_in_sc = analysis_result[29]
 
     # TODO: user feedback on how to improve (if necessary)
     if nbr_config_files > 0:
         # how many imports in config
-        nbr_imports_in_config = analysis_result[27]
+        nbr_imports_in_config = analysis_result[28]
         # how many of those are strict specified (==)
-        pct_strict_imports_in_config = analysis_result[29]
+        pct_strict_imports_in_config = analysis_result[30]
         # how many of the used imports in source code are mentioned in config
-        pct_mentioned_to_all_used = analysis_result[31]
+        pct_mentioned_to_all_used = analysis_result[32]
         if nbr_imports_in_sc == 0:
             nbr_imports_in_config_val = 1
             pct_mentioned_to_all_used_val = 1
@@ -247,12 +240,14 @@ def software_environment_feedback(analysis_result):
 
             se_feedback.append('We found no library imports in the source code. Therefore the rating of the config '
                                'file will be 1.0 out of 1.0 no matter what is inside as none of the defined libraries '
-                               'are used.')
+                               'are used.\n')
 
         else:
-            # relation: all defined config libs in relation to all soure-code libs
-            nbr_imports_in_config_val = range_normalization(nbr_imports_in_config, 0, nbr_imports_in_sc, 0, 1) \
-                                        * nbr_config_imports_weight
+            # relation: all defined config libs in relation to all source-code libs
+            # at this point could be possible that all the config libs are not related to the source code imports
+            # therefore, we also look at the coverage percentage below
+            nbr_imports_in_config_val = round(range_normalization(nbr_imports_in_config, 0, nbr_imports_in_sc, 0, 1) \
+                                        * nbr_config_imports_weight, 2)
 
             se_feedback.append('1. Number of libraries in config file(s) rating (score: '
                                + str(round(nbr_imports_in_config_val / nbr_config_imports_weight, 2))
@@ -264,8 +259,8 @@ def software_environment_feedback(analysis_result):
                                + ' libraries in the source-code file(s).\n')
 
             # relation: all config libs used in the source code in relation to all source-code libs
-            pct_mentioned_to_all_used_val = range_normalization(pct_mentioned_to_all_used, 0, 100, 0, 1) \
-                                            * pct_mentioned_to_all_used_weight
+            pct_mentioned_to_all_used_val = round(range_normalization(pct_mentioned_to_all_used, 0, 100, 0, 1) \
+                                            * pct_mentioned_to_all_used_weight, 2)
 
             se_feedback.append('2. Percentage of libraries in config file(s) who are also used in the source-code '
                                'in relation to all used in the source-code file(s) rating (score: '
@@ -276,8 +271,8 @@ def software_environment_feedback(analysis_result):
                                  'the in the source-code used libraries are all'
                                  ' defined in the config file(s). More are useless but not harmful.\n')
 
-            pct_strict_imports_in_config_val = range_normalization(pct_strict_imports_in_config, 0, 100, 0, 1) \
-                                               * pct_strict_config_imports_weight
+            pct_strict_imports_in_config_val = round(range_normalization(pct_strict_imports_in_config, 0, 100, 0, 1) \
+                                               * pct_strict_config_imports_weight, 2)
 
             se_feedback.append('3. Percentage of strict defined libraries in config file(s) rating (score: '
                                + str(round(pct_strict_imports_in_config_val / pct_strict_config_imports_weight, 2))
@@ -288,43 +283,70 @@ def software_environment_feedback(analysis_result):
                                + str(pct_strict_imports_in_config)
                                + '% were strictly specified.\n')
 
-        max_value = nbr_config_imports_weight + pct_strict_config_imports_weight + pct_mentioned_to_all_used_weight
-        actual_value = nbr_imports_in_config_val + pct_strict_imports_in_config_val + pct_mentioned_to_all_used_val
-
-        software_env_value = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
-
-        se_feedback.append('> Software environment is calculated from the above identifiers. '
-                           'Since these have a different influence on the overall result, they are weighted as '
-                           'follows:\n\n'
-                           + '- Number of config imports weight: ' + str(nbr_config_imports_weight) + '\n'
-                           + '- Strict config imports weight: ' + str(pct_strict_config_imports_weight) + '\n'
-                           + '- Imports in config in relation to all in source-code weight: '
-                           + str(pct_mentioned_to_all_used_weight))
-
-        factor_result.append('Software environment: ' + str(software_env_value))
-
-        return software_env_value
+        config_value = round(nbr_imports_in_config_val + pct_strict_imports_in_config_val
+                                   + pct_mentioned_to_all_used_val, 2)
     else:
-        software_env_value = 0
+        if nbr_imports_in_sc == 0:
+            config_value = 1
 
-        se_feedback.append('Software environment rating (score: 0 out of 1.0): No Config file(s) found. '
-                           'You should add one (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in order '
-                           'for others to reproduce your repository with the same software '
-                           'environment. We expect from a good config file to strictly specify all library versions '
-                           'and to cover all of the used libraries used in the source code.)')
+            se_feedback.append('> We found no config file(s) but also no relevant library imports in the source code. '
+                               'Therefore the rating of the config file will be 1.0 out of 1.0 because there was no '
+                               'need to define one. If you are adding any not python standard or local libraries in '
+                               'the future, please create a config file and define the used libraries strictly (==).\n')
+        else:
+            config_value = 0
 
-        factor_result.append('Software environment: ' + str(software_env_value))
-        return software_env_value
+            se_feedback.append('> Config file(s) rating (score: 0 out of 1.0): No Config file(s) found. '
+                               'You should add one (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in '
+                               'order for others to reproduce your repository with the same software '
+                               'environment. We expect from a good config file to strictly specify all library '
+                               'versions and to cover all of the used libraries used in the source code.\n')
+
+    pct_public_source_code_imports = analysis_result[25]
+    pct_public_source_code_imports_val = range_normalization(pct_public_source_code_imports, 0, 100, 0, 1) \
+                                         * pct_public_source_code_imports_weight
+
+    se_feedback.append('- Percentage of public available libraries in source code file(s) rating (score: '
+                       + str(round(pct_public_source_code_imports_val /
+                                   pct_public_source_code_imports_weight, 2))
+                       + ' out of 1.0): We expect all of the not local or standard python libraries to be '
+                         'publicly available. We found that '
+                       + str(pct_public_source_code_imports)
+                       + '% are publicly available. We tested if the used library imports are accessible on '
+                         'https://pypi.org. If the score is not 1.0 (=100%): Please try avoiding the use of '
+                         'not public libraries as third parties may not be able to use your repository. Please note: '
+                         'It is also possible that, if the score is not 1.0, all libraries are publicly available, but '
+                         'we could not find a match. If you are unsure please recheck manually.\n')
+
+    se_feedback.append('> Software environment is calculated from the above identifiers. '
+                       'Since these have a different influence on the overall result, they are weighted as '
+                       'follows:\n'
+                       + '- Number of config imports weight: ' + str(nbr_config_imports_weight) + '\n'
+                       + '- Strict config imports weight: ' + str(pct_strict_config_imports_weight) + '\n'
+                       + '- Imports in config in relation to all in source-code weight: '
+                       + str(pct_mentioned_to_all_used_weight) + '\n'
+                       + '- Percentage of public libs in source code weight: '
+                       + str(pct_public_source_code_imports_weight) + '\n'
+                       + '\n'
+                       + '> Important note: For our analysis we exclude python standard libraries (like os or sys) as '
+                         'well as local file imports. We also eliminate duplicates in the source code (if one import '
+                         'occurs in multiple files we count it as one).')
+
+    software_env_value = round(config_value + pct_public_source_code_imports_val, 2)
+    factor_result.append('Software environment: ' + str(software_env_value))
+
+    return software_env_value
 
 
 # proof of concept: preprocessing functionality is missing
 def dataset_availability_preprocessing_feedback(analysis_result):
-    candidates_weight = 1
-    mentioned_weight = 1
-    pct_mentioned_found_weight = 1
+    # weights added up must be 1
+    candidates_weight = 0.2
+    mentioned_weight = 0.6
+    pct_mentioned_found_weight = 0.2
 
     # dataset file candidates (if 0 -> 0 overall)
-    dataset_file_candidates = analysis_result[34]
+    dataset_file_candidates = analysis_result[35]
     if dataset_file_candidates == 0:
         ds_feedback.append('Dataset availability and documentation rating (score: 0 out of 1.0): '
                            'No dataset file candidate(s) found. If you have provided a dataset in your repository '
@@ -338,8 +360,8 @@ def dataset_availability_preprocessing_feedback(analysis_result):
         # TODO:BASELINE for how many candidates is good
         max_val_candidates = 1  # TODO: change should be baseline val
         max_val_mentioned = 1  # TODO: change should be baseline val
-        dataset_file_candidates_val = range_normalization(dataset_file_candidates, 0, max_val_candidates, 0, 1) \
-                                      * candidates_weight
+        dataset_file_candidates_val = round(range_normalization(dataset_file_candidates, 0, max_val_candidates, 0, 1) \
+                                      * candidates_weight, 2)
 
         # TODO: edit message when baseline val is clear.
         ds_feedback.append('1. Dataset file candidates rating (score: '
@@ -349,9 +371,9 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                            + ' dataset file candidates in the repository.\n')
 
         # # dataset file candidates mentioned in source code
-        ds_file_candidates_mentioned_in_sc = analysis_result[35]
-        ds_file_candidates_mentioned_in_sc_val = range_normalization(ds_file_candidates_mentioned_in_sc,
-                                                                     0, max_val_mentioned, 0, 1) * mentioned_weight
+        ds_file_candidates_mentioned_in_sc = analysis_result[36]
+        ds_file_candidates_mentioned_in_sc_val = round(range_normalization(ds_file_candidates_mentioned_in_sc,
+                                                                     0, max_val_mentioned, 0, 1) * mentioned_weight, 2)
 
         # TODO: edit message when baseline val is clear.
         # how many dataset file candidates were mentioned in the source code
@@ -365,9 +387,9 @@ def dataset_availability_preprocessing_feedback(analysis_result):
 
         # % mentioned in relation to all
         # of all found dataset file candidates how many of them were in the source-code
-        pct_ds_candidates_mentioned_to_all_found = analysis_result[36]
-        pct_ds_candidates_mentioned_to_all_found_val = range_normalization(pct_ds_candidates_mentioned_to_all_found,
-                                                                           0, 100, 0, 1) * pct_mentioned_found_weight
+        pct_ds_candidates_mentioned_to_all_found = analysis_result[37]
+        pct_ds_candidates_mentioned_to_all_found_val = round(range_normalization(
+            pct_ds_candidates_mentioned_to_all_found, 0, 100, 0, 1) * pct_mentioned_found_weight, 2)
 
         ds_feedback.append('3. Percentage of mentioned to all found dataset file candidates rating (score: '
                            + str(round(pct_ds_candidates_mentioned_to_all_found_val / pct_mentioned_found_weight, 2))
@@ -387,11 +409,8 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                            + '- Dataset file candidates found in source-code in relation to all found weight: '
                            + str(pct_mentioned_found_weight))
 
-        max_value = candidates_weight + mentioned_weight + pct_mentioned_found_weight
-        actual_value = dataset_file_candidates_val + ds_file_candidates_mentioned_in_sc_val \
-                       + pct_ds_candidates_mentioned_to_all_found_val
-
-        dataset_val = round(range_normalization(actual_value, 0, max_value, 0, 1), 2)
+        dataset_val = round(dataset_file_candidates_val + ds_file_candidates_mentioned_in_sc_val \
+                       + pct_ds_candidates_mentioned_to_all_found_val, 2)
         factor_result.append('Dataset availability and preprocessing: ' + str(dataset_val))
 
         return dataset_val
@@ -458,32 +477,33 @@ def hyperparameter_feedback(analysis_result):
     if nbr_hp_indicators > 0:
         hp_val = round(range_normalization(nbr_hp_indicators, 0, BL_NMB_HP_IND, 0, 1), 2)
 
-        hp_feedback.append('Hyperparameter declaration rating (score: '
+        hp_feedback.append('Hyperparameter logging rating (score: '
                            + str(hp_val)
                            + ' out of 1.0): We found '
                            + str(nbr_hp_indicators)
-                           + ' hyperparameter declaration indicator(s) in the source code. '
+                           + ' hyperparameter logging indicator(s) in the source code. '
                              'We determined that '
                            + str(BL_NMB_HP_IND)
-                           + ' hyperparameter declaration indicators are a good value.'
-                             ' Documenting changes of the hyperparameters helps in the field of machine learning, '
+                           + ' hyperparameter logging indicators are a good value.'
+                             ' Logging changes of the hyperparameters helps in the field of machine learning, '
                              'where incremental improvements should be documented in order for others to understand '
                              'the steps taken.')
     else:
-        hp_feedback.append('Hyperparameter declaration rating (score: 0 out of 1.0): '
-                           'No hyperparameter declarations found. We look out for imports of the following libraries '
-                           'in the source code: "wandb", "neptune", "kubeflow" and "sacred". These libraries enable '
-                           'the logging of these parameters in order to document them. '
-                           'Documenting changes of the hyperparameters helps in the field of machine learning, '
+        hp_feedback.append('Hyperparameter logging rating (score: 0 out of 1.0): '
+                           'No hyperparameter logging indicators found. We look out for imports of the following '
+                           'libraries in the source code: "wandb", "neptune", "mlflow" and "sacred". These libraries '
+                           'enable the logging of these parameters in order to document them. Also, we are looking '
+                           'for the method calls of these libraries (logging).'
+                           'Logging changes of the hyperparameters helps in the field of machine learning, '
                            'where incremental improvements should be documented in order for others to understand '
                            'the steps taken.')
 
-    factor_result.append('Hyperparameter declaration: ' + str(hp_val))
+    factor_result.append('Hyperparameter logging: ' + str(hp_val))
     return hp_val
 
 
 def out_of_the_box_buildability_feedback(analysis_result):
-    ootb_buildable = analysis_result[37]
+    ootb_buildable = analysis_result[38]
 
     # TODO: user feedback on how to improve (if necessary)
     if ootb_buildable == 'BinderHub not reachable':
@@ -554,7 +574,7 @@ def build_feedback_file(file_path):
     feedback_txt.write('\n\n## MODEL SERIALIZATION FEEDBACK\n\n')
     for element in ms_feedback:
         feedback_txt.write(element + "\n")
-    feedback_txt.write('\n\n## HYPERPARAMETER DECLARATION FEEDBACK\n\n')
+    feedback_txt.write('\n\n## HYPERPARAMETER LOGGING FEEDBACK\n\n')
     for element in hp_feedback:
         feedback_txt.write(element + "\n")
     feedback_txt.write('\n\n## OUT-OF-THE-BOX BUILDABILITY FEEDBACK\n\n')
