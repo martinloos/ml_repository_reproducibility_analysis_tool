@@ -37,12 +37,11 @@ def clone_repo(url):
         if cloning_error == 1:
             logger.error('Cloning the repository failed. Please verify your provided URL ' + url)
             sys.exit()
-
-        return local_dir_path
     else:
-        logger.error('Downloading repository failed. Please rename or delete the following directory in order to use '
-                     'this tool with the provided url. Directory path: ' + local_dir_path)
-        sys.exit()
+        logger.error('Local repository path exists already. We assume the repository with the following local path is '
+                     'the one you want to analyze: ' + local_dir_path)
+
+    return local_dir_path
 
 
 def test_repo_url(url):
