@@ -158,7 +158,7 @@ def build_terminal_response():
     table.add_row('Model serializaton used?', str(analysis_result[23]))
     table.add_row('# hyperparameter logging indicators', str(analysis_result[24]))
     table.add_row('% public available libraries in relation to all unique imports in source code (excl. local libs '
-                  'and python standard libs)' + str(analysis_result[25]))
+                  'and python standard libs)', str(analysis_result[25]))
     table.add_row('# config files', str(analysis_result[26]))
     table.add_row('OS specified in config file(s)', str(analysis_result[27]))
     table.add_row('# unique imports in config file(s)', str(analysis_result[28]))
