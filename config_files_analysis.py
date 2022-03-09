@@ -42,6 +42,10 @@ def analyse_config_files(verbose):
 def retrieve_all_config_imports():
     config_files.extend((filter_repository_artefacts.get_config_files()))
 
+    if not config_files:
+        print(':pile_of_poo: [bold red]No config file(s) detected.[/bold red]')
+        return
+
     for file in config_files:
         file_name = file[0].lower()
         file_path = file[1]
