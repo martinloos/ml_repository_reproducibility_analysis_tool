@@ -8,7 +8,7 @@ import time
 from rich import print
 
 # Change IP/URL at front to use
-BINDERHUB_BASE_URL = '10.108.224.55/build/gh/'
+BINDERHUB_BASE_URL = '10.100.198.221/build/gh/'
 
 result = []
 
@@ -54,41 +54,43 @@ def call_binderhub_to_build(repo_owner, repo_name):
     commands = ['curl', '-H', '"Accept: application/json"', '--connect-timeout', '120', '--max-time', '1200',
                 url]
 
-    rate_limit_exceeded = 0
+    finished_build_call = 0
 
-    while (rate_limit_exceeded == 0) & (binderhub_reachable == 1):
+    while (finished_build_call == 0) & (binderhub_reachable == 1):
         cmd = subprocess.Popen(commands, stdout=subprocess.PIPE)
         out, err = cmd.communicate()
 
         if out:
-            # Decode UTF-8 bytes to Unicode, and convert single quotes
-            # to double quotes to make it valid JSON
-            out_json = out.decode('utf8').replace("'", '"').replace('data: ', '').replace(':keepalive', '').strip()
+            out_json = out.decode('utf8').replace('data: ', '').replace(':keepalive', '').strip()
             string_list = out_json.split('}')
             for s in string_list:
                 if 'phase' in s:
-                    s = s.replace('\n', '') + '}'
-                    # Load the JSON to a Python list & dump it back out as formatted JSON
-                    data = json.loads(s)
-                    if 'Rate limit exceeded.' in s:
-                        # retry in 5 minutes
-                        print('\n:pile_of_poo: [bold red]Rate limit for BinderHub Call exceeded. '
-                              'Retrying in 5 minutes. Please wait. This may take up to one hour.[/bold red]\n')
-                        time.sleep(300)
-                    else:
-                        if data['phase'] == 'ready':
-                            url = (data['url']).replace('\n', '')
-                            token = data['token'].replace('\n', '')
-                            print("\n:smiley: [bold green]BinderHub build successful! [/bold green]")
-                            print('Url: ' + url + ' Token: ' + token + '\n')
-                            rate_limit_exceeded = 1
-                            build_successful = 1
-                            ootb_buildable = 'Yes'
-                        elif data['phase'] == 'failed':
-                            msg = (data['message']).replace('\n', '')
-                            print('\n:pile_of_poo: [bold red]Failed with message: [/bold red]'
-                                  + msg + '\n')
-                            rate_limit_exceeded = 1
-                            ootb_buildable = 'No'
+                    s = s.replace('\\n', '').replace('\n', '') + '}'
+                    if (s.startswith('{')) and not ('"phase": "building"' in s):
+                        # Load the JSON to a Python list & dump it back out as formatted JSON
+                        data = json.loads(s)
+                        if 'Rate limit exceeded.' in s:
+                            # retry in 5 minutes
+                            print('\n:pile_of_poo: [bold red]Rate limit for BinderHub Call exceeded. '
+                                  'Retrying in 5 minutes. Please wait. This may take up to one hour.[/bold red]\n')
+                            time.sleep(300)
+                        else:
+                            if data['phase'].lower() == 'ready':
+                                url = (data['url']).replace('\n', '')
+                                token = data['token'].replace('\n', '')
+                                print("\n:smiley: [bold green]BinderHub build successful! [/bold green]")
+                                print('Url: ' + url + ' Token: ' + token + '\n')
+                                finished_build_call = 1
+                                ootb_buildable = 'Yes'
+                            elif data['phase'].lower() == 'failed':
+                                try:
+                                    msg = (data['message']).replace('\n', '')
+                                except KeyError:
+                                    msg = 'Failed.'
+                                print('\n:pile_of_poo: [bold red]Failed with message: [/bold red]'
+                                      + msg + '\n')
+                                finished_build_call = 1
+                                ootb_buildable = 'No'
 
     result.append(ootb_buildable)
+
