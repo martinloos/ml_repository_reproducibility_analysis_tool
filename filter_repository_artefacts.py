@@ -16,6 +16,7 @@ reg = re.compile("(((.+)?data(.+)?)|((.+)?im(a)?g))")
 dataset_folders = []
 files_name_data = []
 dvc_folder = []
+dvc_extensions = {'.dvc', '.h5', '.pkl', '.model'}
 dvc_files = []
 
 accepted_files = {'readme', 'requirements', 'config.yml', 'config.yaml', 'conda.env', 'license', 'dockerfile'}
@@ -51,7 +52,7 @@ def get_relevant_artefacts(local_repo_dir_path, verbose):
             source_code_files.append(f)
         elif file_extension == '.py':
             source_code_files.append(f)
-        elif file_extension == '.dvc':
+        elif file_extension in dvc_extensions:
             dvc_files.append(f)
         elif 'readme' in file_name:
             readme.append(f)
