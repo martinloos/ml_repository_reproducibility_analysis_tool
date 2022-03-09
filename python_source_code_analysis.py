@@ -164,7 +164,7 @@ def get_file_directory(file_path):
 def convert_jupyter_nb_to_py(file_name):
     f_name = re.sub(r"[^a-zA-Z0-9.]", "", file_name)
     os.rename(file_name, f_name)
-    os.system('jupyter nbconvert --to script ' + str(f_name) + ' --to python')
+    os.system('jupyter nbconvert ' + str(f_name) + ' --to python')
     f_name = f_name.replace('.ipynb', '.py')
     return f_name
 
@@ -339,7 +339,12 @@ def pylint_code_style_rating(file, file_path, verbose):
         rating_sentence = (stdout[-3])
         rs_list = rating_sentence.split()
         if len(rs_list) >= 7:
-            return float(rs_list[6].split('/')[0])
+            try:
+                rating = float(rs_list[6].split('/')[0])
+                return rating
+            # occurs e.g. if all code is commented out in source code file
+            except ValueError:
+                return 0
         return 0
     # if no rating
     else:
