@@ -9,6 +9,7 @@ import re
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from charset_normalizer import detect
 
 # regex for detecting all kinds of links in text
 # tested: line break would influence regex, so keep it in one line
@@ -44,10 +45,13 @@ def analyse_readme(verbose):
             readme_name = file[0]
             readme_file_path = file[1]
             logger.info('Processing readme ' + str(counter) + ' out of ' + str(len(readme)) + ' (' + readme_name + ')')
-            length = readme_length(readme_file_path)
-            links = get_readme_links(readme_file_path)
+
+            encoding = get_encoding(readme_file_path)
+
+            length = readme_length(readme_file_path, encoding)
+            links = get_readme_links(readme_file_path, encoding)
             test_readme_links(links, readme_file_path)
-            has_binder_badge = check_binder_badge(readme_file_path)
+            has_binder_badge = check_binder_badge(readme_file_path, encoding)
             readme_files = [readme_name, readme_file_path, length, has_binder_badge]
             readme_data.append(readme_files)
             counter = counter + 1
@@ -56,25 +60,33 @@ def analyse_readme(verbose):
         logger.warning('Found no readme to analyse')
 
 
-def readme_length(readme_path):
+def get_encoding(readme_path):
+    with open(readme_path, 'rb') as f:
+        data = f.read()  # or a chunk, f.read(1000000)
+    encoding = detect(data).get("encoding")
+
+    return encoding
+
+
+def readme_length(readme_path, encoding_type):
     i = 0
-    with open(readme_path) as r:
+    with open(readme_path, encoding=encoding_type) as r:
         for i, l in enumerate(r):
             pass
     return i + 1
 
 
-def get_readme_links(readme_file_path):
-    readme_file = open(readme_file_path, "r")
+def get_readme_links(readme_file_path, encoding_type):
+    readme_file = open(readme_file_path, "r", encoding=encoding_type)
     readme_text = readme_file.read()
     readme_file.close()
 
     return re.findall(regex, readme_text)
 
 
-def check_binder_badge(readme_file_path):
+def check_binder_badge(readme_file_path, encoding_type):
     is_present = 0
-    readme_file = open(readme_file_path, "r")
+    readme_file = open(readme_file_path, "r", encoding=encoding_type)
     readme_text = readme_file.read()
     if binder_badge_keyword in readme_text:
         is_present = 1
@@ -91,7 +103,10 @@ def test_readme_links(links, file_path):
                 link = 'https://' + link
             lower_case_link = link.lower()
             check_if_link_from_paper_publisher(lower_case_link)
-            requests.get(link)
+            r = requests.get(link)
+            if str(r.status_code) == '404':
+                inaccessible_readme_link = link, file_path
+                inaccessible_readme_links.append(inaccessible_readme_link)
         except requests.ConnectionError as exception:
             inaccessible_readme_link = link, file_path
             inaccessible_readme_links.append(inaccessible_readme_link)
