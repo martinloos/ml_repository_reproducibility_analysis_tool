@@ -197,8 +197,9 @@ def build_source_code_result(verbose):
 
         # duplicate elimination (multiple sc files)
         for imp in result[10]:
-            if imp not in unique_imports:
-                unique_imports.append(imp)
+            imp_tmp = imp.replace(',', '')
+            if imp_tmp not in unique_imports:
+                unique_imports.append(imp_tmp)
 
         for dataset_file in result[11]:
             if dataset_file not in mentioned_dataset_files:
@@ -211,6 +212,7 @@ def build_source_code_result(verbose):
         lib_imp_is_nested_module_path = 0
 
         # if imp is nested module path e.g. path: model.modules.f_extraction and imp: modules.f_extraction
+        # example two: from modules import xy -> imp = modules -> modules is in mod_f_path -> locale
         if '.' in imp:
             for mod_f_path in mod_file_paths:
                 if imp in mod_f_path:
