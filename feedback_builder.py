@@ -119,7 +119,10 @@ def source_code_availability_documentation_feedback(analysis_result):
 
 
 def calculate_license_value(nbr_licenses, nbr_os_licenses):
-    normalized_license_value = round(range_normalization(nbr_os_licenses, 0, nbr_licenses, 0, 1), 2)
+    if nbr_licenses > 0:
+        normalized_license_value = round(range_normalization(nbr_os_licenses, 0, nbr_licenses, 0, 1), 2)
+    else:
+        normalized_license_value = 0
 
     if nbr_licenses == 0:
         sc_feedback.append('1. License rating (score: '
@@ -287,10 +290,12 @@ def software_environment_feedback(analysis_result):
                                    + pct_mentioned_to_all_used_val, 2)
     else:
         if nbr_imports_in_sc == 0:
-            config_value = 1
+            config_value = nbr_config_imports_weight + pct_strict_config_imports_weight + \
+                           pct_mentioned_to_all_used_weight
 
             se_feedback.append('> We found no config file(s) but also no relevant library imports in the source code. '
-                               'Therefore the rating of the config file will be 1.0 out of 1.0 because there was no '
+                               'Therefore the rating of the config file will be ' + str(config_value) +
+                               ' (which is the maximum) because there was no '
                                'need to define one. If you are adding any not python standard or local libraries in '
                                'the future, please create a config file and define the used libraries strictly (==).\n')
         else:
@@ -355,6 +360,10 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                            'in order for others to reproduce your repository with the same input data. '
                            'Linking the dataset would be an option, but as can not guarantee that the dataset will be '
                            'accessible in the future it is not a good solution.')
+
+        dataset_val = 0
+        factor_result.append('Dataset availability and preprocessing: ' + str(dataset_val))
+
         return 0
     else:
         # TODO:BASELINE for how many candidates is good
