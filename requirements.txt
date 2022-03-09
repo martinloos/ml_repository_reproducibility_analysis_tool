@@ -3,3 +3,4 @@ requests==2.18.4
 rich==10.15.2
 pylint==2.12.2
 pip-search==0.0.10
+charset-normalizer==2.0.7
