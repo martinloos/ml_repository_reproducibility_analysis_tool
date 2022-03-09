@@ -161,13 +161,9 @@ def main(argv):
             # use data collected from dataset analysis + source code analysis
             dataset_analysis.build_dataset_response(verbose)
 
-            if filter_repository_artefacts.get_config_files():
-                config_files_analysis.analyse_config_files(verbose)
-                logger.info("Finished analysis for config file(s).")
-            else:
-                # if no config files are detected/present
-                logger.warning('No config file(s) to analyse detected.')
-                print(':pile_of_poo: [bold red]No config file(s) detected.[/bold red]')
+            logger.info("Started analysis for config file(s).")
+            config_files_analysis.analyse_config_files(verbose)
+            logger.info("Finished analysis for config file(s).")
 
             # builds the repository with BinderHub
             # API call response can either be successful or not
@@ -176,7 +172,7 @@ def main(argv):
                 .replace('github.com/', '').split('/')
             repo_author = repo_url_lst[0]
             repo_name = repo_url_lst[1]
-            binderhub_call.call_binderhub_to_build(repo_author, repo_name)
+            # binderhub_call.call_binderhub_to_build(repo_author, repo_name)
 
             try:
                 shutil.rmtree(local_repo_dir)
