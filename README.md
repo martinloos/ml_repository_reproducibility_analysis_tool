@@ -106,7 +106,7 @@ Architecture
 --------------------------
 In order to explain the interaction and the order of execution of the individual source code files, we describe the tool architecture using the following flow chart. In addition, we briefly describe the function of each file in a simplified form.
 
-[Tool flow chart](./images/flowchart.png)
+[Tool flow chart](/images/flowchart.png?raw=true)
 
 **[main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py)**: Entry point. Processes the terminal command and executes each source code file in the order described in the flowchart.
 
