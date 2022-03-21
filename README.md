@@ -9,7 +9,7 @@ This tool helps authors and developers of machine learning experiments as well a
 This is made possible by the approach described in the [paper](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis.pdf) for connecting reproducibility factors with software-based recognition indicators. In simplified terms, this is done using the following approach:
 
 1. Analysis of relevant indicators regarding the reproducibility of a machine learning repository
-2. Based on the results of the analysis of two different sets of ML repositories (one containing reproducible and the other non-reproducible repositories), relevant indicators are identified. Representative values ​​and weighting are then assigned to these relevant indicators using statistical and heuristic methods. 
+2. Based on the results of the analysis of two different sets of ML repositories (one containing reproducible and the other non-reproducible repositories), relevant indicators are identified. Representative values ​​and weighting are then assigned to these relevant indicators using statistical and heuristic methods. The analysis results of both sets can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/representative_indicator_value_extraction_sets).
 3. These values ​​can then be used to compare the measured values ​​with the representative ones when analyzing an ML repository. Because the values ​​can have different ranges, we use range normalization to merge these intermediate indicator scores into an overall score for one factor.
 4. Based on the intermediate results of the indicators and the overall result of a factor, the tool can then provide feedback that can be used to increase the reproducibility probability.
 
@@ -101,6 +101,8 @@ This tool produces output in 3 different places.
 **Feedback file**: Based on the measured indicator values, feedback is provided for the reproducibility factors (and the individual indicators). This is done in text form as well as through a scoring value.
 
 The result and the feedback file are saved under the specified output path (default: "/tmp").
+
+Sample output files can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/example_output).
 
 Architecture
 --------------------------
