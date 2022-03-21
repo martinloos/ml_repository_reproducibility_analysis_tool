@@ -29,34 +29,34 @@ Works with **`Python versions from 3.6.2+ to 3.7.13`** (higher versions may also
 We used `Ubuntu 18.04 LTS and 20.04 LTS` as the operating system.
 You can check your Python version using the terminal command:
  
-    ```
-    $ python -V
-    ```
+```
+$ python -V
+```
 
 Since the tool uses the functionality of **cURL**, this must also be installed.
 You can check your cURL version using the terminal command: 
 
-    ```
-    $ curl -V
-    ```
+```
+$ curl -V
+```
 
 Then, you need to **download** this repository in order to be able to run the code locally.
 
-    ```
-    $ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
-    ```
+```
+$ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
+```
 
 **Change** the **working directory** to the downloaded folder
 
-    ```
-    $ cd ~/<path_to_repository>/ml_repository_reproducibility_analysis_tool
-    ```
+```
+$ cd ~/<path_to_repository>/ml_repository_reproducibility_analysis_tool
+```
 
 After the steps described have been carried out, **install** the remaining **dependencies**: 
 
-    ```
-    $ "pip install -r requirements.txt".
-    ```
+```
+$ "pip install -r requirements.txt".
+```
 
 Then only the following **two modifications have to be made**:
 
@@ -72,23 +72,23 @@ This tool is command line based (possible commands below).
 
 For a detailed description, execute the following command. Then, an overview of the options available should be shown to you.
 
-    ```
-    $ python3 main.py -h
-    ```
+```
+$ python3 main.py -h
+```
 
 To start **analyzing a repository**, run the following command.
 
-    ```
-    $ python3 main.py -u <repository_url>
-    ```
+```
+$ python3 main.py -u <repository_url>
+```
 
 > Reminder: The repository must be hosted by GitHub.
 
 With the following command you will get **additional information** in your command line (not saved in the result and/or feedback file).
 
-    ```
-    $ python3 main.py -u <repository_url> -v
-    ```
+```
+$ python3 main.py -u <repository_url> -v
+```
 
 Output
 --------------------------
