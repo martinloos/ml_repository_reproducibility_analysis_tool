@@ -18,45 +18,45 @@ Restrictions & Assumptions
 This **tool** was created as part of my bachelor thesis and serves as a **proof of concept**. It is therefore also subject to the following restrictions and assumptions.
 
 1. A public repository hosted by GitHub is expected as input.
-2. We are using the "master" branch as default. If not present the tool looks for a "main" branch. If both not found, the tool does not work.
+2. We are using the `master` branch as default. If not present the tool looks for a `main` branch. If both not found, the tool does not work.
 3. Only source code files with the file extension .py (Python) and .ipynb (Python Notebook) are currently supported.
 4. We expect the used data set(s) to be in the repository. From a reproducibility point of view, linking to external data sets is not optimal, as it cannot be guaranteed that these will also be available in the future.
 5. Since the structure of a repository can vary greatly, the tool cannot always determine a property with 100% certainty. We describe additional details on this in the generated feedback file.
 
 Setup
 ---------------------
-Works with **Python versions from 3.6.2+ to 3.7.13** (higher versions may also work, but the we recommend these).
-We used Ubuntu 18.04 LTS and 20.04 LTS as the operating system.
+Works with **`Python versions from 3.6.2+ to 3.7.13`** (higher versions may also work, but the we recommend these).
+We used `Ubuntu 18.04 LTS and 20.04 LTS` as the operating system.
 You can check your Python version using the terminal command:
  
-```
-$ python -V
-```
+    ```
+    $ python -V
+    ```
 
 Since the tool uses the functionality of **cURL**, this must also be installed.
 You can check your cURL version using the terminal command: 
 
-```
-$ curl -V
-```
+    ```
+    $ curl -V
+    ```
 
 Then, you need to **download** this repository in order to be able to run the code locally.
 
-```
-$ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
-```
+    ```
+    $ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
+    ```
 
 **Change** the **working directory** to the downloaded folder
 
-```
-$ cd ~/<path_to_repository>/ml_repository_reproducibility_analysis_tool
-```
+    ```
+    $ cd ~/<path_to_repository>/ml_repository_reproducibility_analysis_tool
+    ```
 
 After the steps described have been carried out, **install** the remaining **dependencies**: 
 
-```
-$ "pip install -r requirements.txt".
-```
+    ```
+    $ "pip install -r requirements.txt".
+    ```
 
 Then only the following **two modifications have to be made**:
 
@@ -72,35 +72,35 @@ This tool is command line based (possible commands below).
 
 For a detailed description, execute the following command. Then, an overview of the options available should be shown to you.
 
-```
-$ python3 main.py -h
-```
+    ```
+    $ python3 main.py -h
+    ```
 
 To start **analyzing a repository**, run the following command.
 
-```
-$ python3 main.py -u <repository_url>
-```
+    ```
+    $ python3 main.py -u <repository_url>
+    ```
 
 > Reminder: The repository must be hosted by GitHub.
 
 With the following command you will get **additional information** in your command line (not saved in the result and/or feedback file).
 
-```
-$ python3 main.py -u <repository_url> -v
-```
+    ```
+    $ python3 main.py -u <repository_url> -v
+    ```
 
 Output
 --------------------------
 This tool produces output in 3 different places.
 
-**Command line**: The intermediate results of each analysis step are displayed in the command line. This information can be used, among other things, for debugging purposes if something goes wrong.
+**`Command line:`** The intermediate results of each analysis step are displayed in the command line. This information can be used, among other things, for debugging purposes if something goes wrong.
 
-**Result file**: The measured values ​​for all examined indicators and additional data points are saved in the result CSV file.
+**`Result file:`** The measured values ​​for all examined indicators and additional data points are saved in the result CSV file.
 
-**Feedback file**: Based on the measured indicator values, feedback is provided for the reproducibility factors (and the individual indicators). This is done in text form as well as through a scoring value.
+**`Feedback file:`** Based on the measured indicator values, feedback is provided for the reproducibility factors (and the individual indicators). This is done in text form as well as through a scoring value.
 
-The result and the feedback file are saved under the specified output path (default: "/tmp").
+The result and the feedback file are saved under the specified output path (`default: "/tmp"`).
 
 Sample output files can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/example_output).
 
