@@ -77,7 +77,7 @@ Then only the following **two modifications have to be made**:
 
 1. Change the csv_path in the [main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py#L31) file (the generated output files will be saved under this path).
 
-2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
+2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
 
 > Note: Don't forget to save these changes.
 
@@ -116,33 +116,33 @@ Architecture
 --------------------------
 In order to explain the interaction and the order of execution of the individual source code files, we describe the tool architecture using the following flow chart. In addition, we briefly describe the function of each file in a simplified form.
 
-![Tool flow chart](/images/flowchart.png?raw=true)
+![Tool flow chart](/assets/images/flowchart.png?raw=true)
 
 **[main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py)**: Entry point. Processes the terminal command and executes each source code file in the order described in the flowchart.
 
-**[repository_cloner.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/repository_cloner.py)**: Downloads the provided GitHub repository locally to the "/tmp" folder if not already present there.
+**[repository_cloner.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/repository_cloner.py)**: Downloads the provided GitHub repository locally to the "/tmp" folder if not already present there.
 
-**[filter_repository_artefacts.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/filter_repository_artefacts.py)**: Analyses the locally downloaded repository and stores lists of relevant files and directories.
+**[filter_repository_artefacts.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/filter_repository_artefacts.py)**: Analyses the locally downloaded repository and stores lists of relevant files and directories.
 
-**[readme_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/readme_analysis.py)**: Analyses the identified readme file(s) from filter_repository_artefacts.py. Stores the result of the readme analysis.
+**[readme_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/readme_analysis.py)**: Analyses the identified readme file(s) from filter_repository_artefacts.py. Stores the result of the readme analysis.
 
-**[license_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/license_analysis.py)**: Analyses the identified license file(s) from filter_repository_artefacts.py. Stores the result of the license analysis.
+**[license_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/license_analysis.py)**: Analyses the identified license file(s) from filter_repository_artefacts.py. Stores the result of the license analysis.
 
-**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/dataset_analysis.py)**: Analyses the identified dataset file(s) and folder(s) from filter_repository_artefacts.py. Stores possible dataset candidates, which later will be checked if they are mentioned in the source code file(s).
+**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Analyses the identified dataset file(s) and folder(s) from filter_repository_artefacts.py. Stores possible dataset candidates, which later will be checked if they are mentioned in the source code file(s).
 
-**[source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/source_code_analysis.py)**: Analyses the identified source code file(s) from filter_repository_artefacts.py. Stores the overall result of the source code file(s) analysis. Note: Other source code type analysis files (e.g. C, R, Java, etc.) should be plugged in here, in case one wants to support them.
+**[source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/source_code_analysis.py)**: Analyses the identified source code file(s) from filter_repository_artefacts.py. Stores the overall result of the source code file(s) analysis. Note: Other source code type analysis files (e.g. C, R, Java, etc.) should be plugged in here, in case one wants to support them.
 
-**[python_source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/python_source_code_analysis.py)**: This file will be called by source_code_analysis.py for each identified .py or .ipynb file. Converts .ipynb to .py file using nbconvert and performs analysis of the python file. Returns the analysis result.
+**[python_source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/python_source_code_analysis.py)**: This file will be called by source_code_analysis.py for each identified .py or .ipynb file. Converts .ipynb to .py file using nbconvert and performs analysis of the python file. Returns the analysis result.
 
-**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/dataset_analysis.py)**: Building the dataset result based on the analysis result of the source_code_analysis.py file where we check for each source code file wether or not a dataset file candidate is mentioned. Stores the result of the dataset analysis.
+**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Building the dataset result based on the analysis result of the source_code_analysis.py file where we check for each source code file wether or not a dataset file candidate is mentioned. Stores the result of the dataset analysis.
 
-**[config_files_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/config_files_analysis.py)**: Analyses the identified configuration file(s) from filter_repository_artefacts.py. Uses result of source_code_analysis.py regarding source code imports. Stores the result of the config file(s) analysis.
+**[config_files_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/config_files_analysis.py)**: Analyses the identified configuration file(s) from filter_repository_artefacts.py. Uses result of source_code_analysis.py regarding source code imports. Stores the result of the config file(s) analysis.
 
-**[binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/binderhub_call.py)**: Tries to build the provided GitHub repository using the configured BinderHub IP/URL. Can result in three different results: BinderHub not reachable, not buildable or buildable. Stores the result.
+**[binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py)**: Tries to build the provided GitHub repository using the configured BinderHub IP/URL. Can result in three different results: BinderHub not reachable, not buildable or buildable. Stores the result.
 
-**[result_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/result_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file.
+**[result_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/result_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file.
 
-**[feedback_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/feedback_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file. Extracts the relevant indicators from the overall analysis result of result_builder.py. These results are used to score each factor. This is based on the indicators associated with a factor and the factor-indicator-connection approach described in the paper. Feedback is generated for each factor and its associated indicators and stored in the feedback .md file.
+**[feedback_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/feedback_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file. Extracts the relevant indicators from the overall analysis result of result_builder.py. These results are used to score each factor. This is based on the indicators associated with a factor and the factor-indicator-connection approach described in the paper. Feedback is generated for each factor and its associated indicators and stored in the feedback .md file.
 
 Presentation
 --------------------------
