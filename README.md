@@ -75,7 +75,7 @@ $ pip install -r requirements.txt
 
 Then only the following **two modifications have to be made**:
 
-1. Change the csv_path in the [main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py#L31) file (the generated output files will be saved under this path).
+1. Change the csv_path in the [main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py#L20) file (the generated output files will be saved under this path).
 
 2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
 
