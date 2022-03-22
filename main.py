@@ -2,7 +2,6 @@
 
 # main.py is the entrance point for the machine learning reproducibility analyzer
 
-# TODO: README how to set up + use this tool (why useful + options to run)
 # TODO: maybe provide logs also in a persistent log file (additional)
 # TODO: MAKE CLEAN UP optional? -> Maybe someone wants to keep the repo locally
 
@@ -14,17 +13,7 @@ import re
 from rich import print
 import json
 
-
-import repository_cloner
-import filter_repository_artefacts
-import readme_analysis
-import license_analysis
-import source_code_analysis
-import config_files_analysis
-import dataset_analysis
-import binderhub_call
-import result_builder
-import feedback_builder
+from modules import *
 
 # TODO: give user possibility to specify BinderHub himself
 # TODO: give user possibility to specify it himself
@@ -41,7 +30,7 @@ def main(argv):
     logger.propagate = False
     logger.addHandler(syslog)
 
-    banner_text = open("banner.txt")
+    banner_text = open("assets/banner.txt")
 
     lines = banner_text.readlines()
     for line in lines:
@@ -149,9 +138,11 @@ def main(argv):
                 logger.warning('No dataset folder(s) to analyse detected.')
                 print(':pile_of_poo: [bold red]No dataset folder(s) detected.[/bold red]')
 
+            # stores all dataset files candidates who are also mentioned in the source code
+            mentioned_dataset_files_in_sc = []
             logger.info("Started source code file(s) analysis ...")
             if filter_repository_artefacts.get_source_code_files():
-                source_code_analysis.analyze_source_code(verbose)
+                mentioned_dataset_files_in_sc.extend((source_code_analysis.analyze_source_code(verbose)))
                 logger.info("Finished analysis for source code file(s).")
             else:
                 # if no source code files are detected/present
@@ -159,7 +150,7 @@ def main(argv):
                 print(':pile_of_poo: [bold red]No source code file(s) detected.[/bold red]')
 
             # use data collected from dataset analysis + source code analysis
-            dataset_analysis.build_dataset_response(verbose)
+            dataset_analysis.build_dataset_response(mentioned_dataset_files_in_sc, verbose)
 
             logger.info("Started analysis for config file(s).")
             config_files_analysis.analyse_config_files(verbose)
