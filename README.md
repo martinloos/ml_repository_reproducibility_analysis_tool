@@ -1,14 +1,29 @@
-[![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)]() 
-
 # Machine Learning Repository Reproducibility Analysis
 
-## _- Supporting tool for researchers and reviewers -_
+## _- Supporting tool regarding the reproducibility of ML repositories for researchers and reviewers -_
 \
+[![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+
+Table of Contents
+---------------------
+- [Description](#description)
+- [Restrictions & Assumptions](#restrictions-&-assumptions)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Output](#output)
+- [Architecture](#architecture)
+- [Presentation](#presentation)
+- [License](#license)
+
+> Hint: Looking at the description below as well as the sample output files is a good starting point to understand how the tool works and to quickly assess the added value it provides.
+
+Description
+---------------------
 This tool helps authors and developers of machine learning experiments as well as reviewers of third-party work. The aim is to increase the probability of reproducibility or to be able to estimate where possible problem areas are. As a result, high quality with regard to reproducibility can be ensured during development or before publication without great additional effort. In addition, a reviewer can quickly and easily examine properties of a machine learning repository in relation to reproducibility.
 
 This is made possible by the approach described in the [paper](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis.pdf) for connecting reproducibility factors with software-based recognition indicators. In simplified terms, this is done using the following approach:
 
-1. Analysis of relevant indicators regarding the reproducibility of a machine learning repository
+1. Analysis of relevant indicators regarding the reproducibility of a machine learning repository.
 2. Based on the results of the analysis of two different sets of ML repositories (one containing reproducible and the other non-reproducible repositories), relevant indicators are identified. Representative values ​​and weighting are then assigned to these relevant indicators using statistical and heuristic methods. The analysis results of both sets can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/representative_indicator_value_extraction_sets).
 3. These values ​​can then be used to compare the measured values ​​with the representative ones when analyzing an ML repository. Because the values ​​can have different ranges, we use range normalization to merge these intermediate indicator scores into an overall score for one factor.
 4. Based on the intermediate results of the indicators and the overall result of a factor, the tool can then provide feedback that can be used to increase the reproducibility probability.
@@ -25,7 +40,7 @@ This **tool** was created as part of my bachelor thesis and serves as a **proof 
 
 Setup
 ---------------------
-Works with **`Python versions from 3.6.2+ to 3.7.13`** (higher versions may also work, but the we recommend these).
+This project works with **`Python versions from 3.6.2+ to 3.7.13`** (higher versions may also work, but the we recommend one of these as we haven't tested others).
 We used `Ubuntu 18.04 LTS and 20.04 LTS` as the operating system.
 You can check your Python version using the terminal command:
  
@@ -55,7 +70,7 @@ $ cd ~/<path_to_repository>/ml_repository_reproducibility_analysis_tool
 After the steps described have been carried out, **install** the remaining **dependencies**: 
 
 ```
-$ "pip install -r requirements.txt".
+$ pip install -r requirements.txt
 ```
 
 Then only the following **two modifications have to be made**:
@@ -64,31 +79,24 @@ Then only the following **two modifications have to be made**:
 
 2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
 
-> Don't forget to save these changes.
+> Note: Don't forget to save these changes.
 
 Usage
 --------------------------
 This tool is command line based (possible commands below).
 
-For a detailed description, execute the following command. Then, an overview of the options available should be shown to you.
-
 ```
+# command to print out helpful information regarding possible commands.
 $ python3 main.py -h
-```
 
-To start **analyzing a repository**, run the following command.
-
-```
+# command to start the repository analysis. replace <repository_url> with a valid and public GitHub repository URL.
 $ python3 main.py -u <repository_url>
+
+# repository analysis with verbose mode on. prints out additional information in the command line (especially useful for debugging).
+$ python3 main.py -u <repository_url> -v
 ```
 
 > Reminder: The repository must be hosted by GitHub.
-
-With the following command you will get **additional information** in your command line (not saved in the result and/or feedback file).
-
-```
-$ python3 main.py -u <repository_url> -v
-```
 
 Output
 --------------------------
@@ -136,6 +144,11 @@ In order to explain the interaction and the order of execution of the individual
 
 **[feedback_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/feedback_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file. Extracts the relevant indicators from the overall analysis result of result_builder.py. These results are used to score each factor. This is based on the indicators associated with a factor and the factor-indicator-connection approach described in the paper. Feedback is generated for each factor and its associated indicators and stored in the feedback .md file.
 
-## License
+Presentation
+--------------------------
 
+Placeholder for describing and linking the presentation.
+
+License
+--------------------------
 [MIT](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/LICENSE)
