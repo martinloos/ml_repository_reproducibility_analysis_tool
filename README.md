@@ -7,7 +7,7 @@
 Table of Contents
 ---------------------
 - [Description](#description)
-- [Restrictions & Assumptions](#restrictions-&-assumptions)
+- [Restrictions](#restrictions)
 - [Setup](#setup)
 - [Usage](#usage)
 - [Output](#output)
@@ -28,9 +28,9 @@ This is made possible by the approach described in the [paper](https://git.fim.u
 3. These values ​​can then be used to compare the measured values ​​with the representative ones when analyzing an ML repository. Because the values ​​can have different ranges, we use range normalization to merge these intermediate indicator scores into an overall score for one factor.
 4. Based on the intermediate results of the indicators and the overall result of a factor, the tool can then provide feedback that can be used to increase the reproducibility probability.
 
-Restrictions & Assumptions
+Restrictions
 ---------------------
-This **tool** was created as part of my bachelor thesis and serves as a **proof of concept**. It is therefore also subject to the following restrictions and assumptions.
+This **tool** was created as part of my bachelor thesis and serves as a **proof of concept**. It is therefore also subject to the following restrictions:
 
 1. A public repository hosted by GitHub is expected as input.
 2. We are using the `master` branch as default. If not present the tool looks for a `main` branch. If both not found, the tool does not work.
