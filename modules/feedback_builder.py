@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
-# builds cli + .txt feedback based on the retrieved result
 from rich import print
 from rich.console import Console
 from rich.table import Table
-
 import modules.result_builder as result_builder
 
-# TODO: doc
-# TODO: SAVE IN REPORT
-
+# Stores the result for all factors
 factor_result = []
+# Each list stores the feedback for the corresponding factor
 sc_feedback = []
 se_feedback = []
 ds_feedback = []
@@ -19,7 +16,7 @@ ms_feedback = []
 hp_feedback = []
 bh_feedback = []
 
-# BASELINES FOR PROPERTIES WHERE THE VALUE IS RELEVANT
+# REPRESENTATIVE VALUES FOR PROPERTIES WHERE THE VALUE IS RELEVANT
 # For the others the existence is enough e.g. open-source-license or not
 BL_AVG_README_LINES = 50
 BL_AVG_README_LINKS = 5
@@ -32,8 +29,16 @@ BL_PCT_DETECTED_DATASET_CAND_IN_SC = 0
 BL_NMB_HP_IND = 1
 
 
-# TODO: determine baseline values
 def build_feedback(feedback_file_path):
+    """
+        Builds the user feedback based on the overall analysis_result. For each factor the corresponding identifiers
+        are analyzed. As the value ranges can be quite different we use range normalization to bring them in the same
+        range in order to be able to compare them. As the influence of each identifier on the factor is different we
+        also use weights for computing a factor score. A full explanation on this is available in the thesis.pdf file.
+
+        Parameters:
+            feedback_file_path (str): The path where the feedback markdown file will be stored.
+    """
     analysis_result = result_builder.get_analysis_result()
 
     sc_val = source_code_availability_documentation_feedback(analysis_result)
