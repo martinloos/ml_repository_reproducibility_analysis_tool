@@ -5,14 +5,10 @@ import os
 from rich import print
 from rich.console import Console
 from rich.table import Table
-
 from modules import readme_analysis, license_analysis, dataset_analysis, source_code_analysis, config_files_analysis, \
     binderhub_call
 
-# TODO: doc
-# Builds result with retrieved data
-# Stores result in file
-
+# Stores the overall result of the repository analysis
 analysis_result = []
 
 
@@ -21,7 +17,16 @@ def get_analysis_result():
 
 
 def build_result(repository_url, output_file):
+    """
+        For all the following partial analyses the result is collected: readme, license, source code files,
+        configuration files, dataset analysis, and the BinderHub build result. These are merged together into an
+        overall result which is written into the result CSV file. Also, the overall result is printed in the command
+        line.
 
+        Parameters:
+            repository_url (str): The url of the repository.
+            output_file (str): The path where the result CSV file will be stored.
+    """
     readme_result = readme_analysis.get_readme_analysis()
     if not readme_result:
         readme_result = build_zero_value_list(7)
@@ -61,6 +66,7 @@ def build_result(repository_url, output_file):
     build_terminal_response()
 
 
+# if a partial analysis result is empty
 def build_zero_value_list(length):
     zero_value_list = []
     counter = 0
@@ -97,6 +103,8 @@ def make_csv_header():
             'out-of-the-box buildable with binderhub']
 
 
+# checks if repository is already in the result file. If yes, we terminate.
+# Could also be implemented in another way if wanted
 def check_repository(repository_url, output_file):
     file = open(output_file, "r")
     csv_reader = csv.reader(file)
