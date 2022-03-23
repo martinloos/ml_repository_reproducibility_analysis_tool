@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import modules.filter_repository_artefacts as filter_repository_artefacts
+import modules.filter_repository_artifacts as filter_repository_artifacts
 import modules.dataset_analysis as dataset_analysis
 import modules.python_source_code_analysis as python_source_code_analysis
 from rich import print
@@ -10,16 +10,22 @@ import logging
 import subprocess
 
 logger = logging.getLogger('log')
+# Stores for each source code file the analysis results
 source_code_file_results = []
+# Stores the overall result for all the source code files analyzed
 source_code_analysis_result = []
+# Stores all the unique (duplicates eliminated) source code imports
 unique_imports = []
+# Stores a list of libs which are not in the python standard library and not local modules but are publicly available
 public_libs = []
+# Stores a list of libs which are not in the python standard library and not local modules but not publicly available
 not_public_libs = []
-
-# file_names and mod_file_paths used to filter relevant imports
+# file_names and mod_file_paths of each source code file used to filter relevant imports
+# we want to exclude local module imports
 file_names = []
+# list of file paths, but modified. used to detect nested local module imports (e.g. import module.module_name)
 mod_file_paths = []
-
+# Stores all the dataset file candidates who are mentioned in at least one source code file
 mentioned_dataset_files = []
 # excluding libraries below when comparing imports from config file to the used imports from source code
 # also excluding imports named like files e.g. import model when there is a model.py file
@@ -61,19 +67,29 @@ py_standard_lib_list = ['io', 'os', 'os.path', 'argparse', 'getopt', 'optparse',
                         'py_compile', 'compileall', 'dis', 'pickletools', 'msilib', 'msvcrt', 'winreg', 'winsound',
                         'posix', 'pwd', 'spwd', 'grp', 'crypt', 'termios', 'tty', 'pty', 'fcntl', 'pipes', 'resource',
                         'nis', 'syslog']
-
-# all lib imports in source code that are not in py_standard_lib_list and file_names or mod_file_paths
+# List of all lib imports in source code that are not in py_standard_lib_list and file_names or mod_file_paths
 not_standard_lib_imports = []
-
-# TODO: doc
-
-# Analysing the source code of the repository
-# We only accept python code (and Jupyter Notebooks) at the moment
-# Other source code types can be integrated here
 
 
 def analyze_source_code(verbose):
-    source_code_files = filter_repository_artefacts.get_source_code_files()
+    """
+        Firstly, all found source code files from the filter_repository_artifacts module are collected.
+        Then, all the identified dataset file candidates are collected from the dataset_analysis module.
+        For each source code file the corresponding module is called (python_source_code_analysis for .py and .ipynb).
+        Source_code_file_result stores the analysis result for each source code file. Based on this the overall result
+        is created and stored (source_code_analysis_result). This result will also be printed out in the command line.
+        If verbose is specified, additional information will be printed out as well.
+        Note: At the moment only .py and .ipynb files are supported. Other source code types can be integrated by
+        plugging them in here.
+
+        Parameters:
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+
+        Returns:
+            mentioned_dataset_files (List[str]): A list containing all the dataset file candidates who are mentioned in
+            at least one of the source code files.
+    """
+    source_code_files = filter_repository_artifacts.get_source_code_files()
     dataset_file_candidates = dataset_analysis.get_dataset_file_candidates()
     counter = 1
 
@@ -118,15 +134,15 @@ def calculate_percentage(value1, value2):
     return round(100 * float(value1) / float(value2), 2)
 
 
-def check_for_dvc():
-    dvc_folder = filter_repository_artefacts.get_dvc_folder()
+def check_for_model_serialization():
+    dvc_folder = filter_repository_artifacts.get_dvc_folder()
 
     if dvc_folder:
         return 1
 
-    dvc_files = filter_repository_artefacts.get_dvc_files()
+    ms_files = filter_repository_artifacts.get_ms_files()
 
-    if dvc_files:
+    if ms_files:
         return 1
 
 
@@ -260,7 +276,7 @@ def build_source_code_result(verbose):
 
     model_serialization_used = 'No'
     # if model serialization -> number of hyperparameter indicators irrelevant because models are serialized
-    if (check_for_dvc() == 1) or (number_of_model_serialization_indicators > 0):
+    if (check_for_model_serialization() == 1) or (number_of_model_serialization_indicators > 0):
         model_serialization_used = 'Yes'
 
     source_code_analysis_result.extend((number_of_sc_files, total_code_lines, percentage_code_lines,
@@ -299,6 +315,7 @@ def build_source_code_result(verbose):
     console.print(table)
     print('\n')
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
 
         if public_libs:
