@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 
-# TODO: doc
-
 import logging
 import sys
 import os
 import requests
-
 import git
 
 logger = logging.getLogger('log')
@@ -14,6 +11,16 @@ logger = logging.getLogger('log')
 
 # cloning repository into /tmp/<directory_name>
 def clone_repo(url):
+    """
+        Firstly, it is checked if the repository is already present in the /tmp folder. If not, we try to download
+        it (trying master branch first, if not present main branch next, if not present we exit).
+
+        Parameters:
+            url (str): The URL of the repository which should be cloned.
+
+        Returns:
+            local_dir_path (str): The path where the downloaded repository is stored.
+    """
     directory_name = build_name_from_url(url)
     local_dir_path = '/tmp/' + directory_name
     cloning_error = 1
