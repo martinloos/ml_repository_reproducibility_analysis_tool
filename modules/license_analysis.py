@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
-import modules.filter_repository_artefacts as filter_repository_artefacts
+import modules.filter_repository_artifacts as filter_repository_artifacts
 from rich import print
 from rich.console import Console
 from rich.table import Table
-
-# TODO: doc
 
 # assuming license to be open source if they are according to FSF
 # see: https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
@@ -24,15 +22,25 @@ fsf_open_source_licenses = ['Academic Free', 'Affero General Public', 'Apache',
                             'Unilicense', 'W3C Software Notice', 'WTFPL',
                             'Do What The Fuck You Want', 'XFree86 1.1',
                             'zlib/libpng', 'Zope Public']
-
+# List of all the found open source licenses
 open_source_licenses = []
+# List of all the found non-open source licenses
 non_open_source_licenses = []
-
+# Stores the overall license analysis result
 license_result = []
 
 
 def analyse_license(verbose):
-    repo_license = filter_repository_artefacts.get_license()
+    """
+        Firstly, all the found license files from the filter_repository_artifacts module are collected. Then, the
+        license text is checked whether one of the entries of the fsf_open_source_licenses are mentioned. If yes,
+        the license is stored in the open_source_licenses. If not, the license is stored in the
+        non_open_source_licenses. Also, the overall result of the license analysis is stored.
+
+        Parameters:
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+    """
+    repo_license = filter_repository_artifacts.get_license()
     if repo_license:
         for file in repo_license:
             license_name = file[0]
@@ -93,6 +101,7 @@ def build_license_response(verbose):
     console.print(table)
     print('\n')
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
         print('\n\n')
         print('[bold] ____________________________________________________[/bold]')
