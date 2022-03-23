@@ -1,31 +1,26 @@
 #!/usr/bin/python3
 
-import modules.filter_repository_artefacts as filter_repository_artefacts
+import modules.filter_repository_artifacts as filter_repository_artifacts
 import os
 import re
 from rich import print
 from rich.console import Console
 from rich.table import Table
 
-# import modules.source_code_analysis as source_code_analysis
-
+# File extension regex used to eliminate .py, .ipynb and .md files which are for sure no dataset files
 reg_ext = re.compile("(.+)?((.py$)|(.ipynb$)|(.md$))")
-
+# Stores all the found dataset folders from the filter_repository_artifacts module.
 dataset_folders = []
-
+# Stores all the found dataset file candidates. These are all files with 'data' in name and files inside the found
+# dataset folders which do not match reg_ext.
 dataset_file_candidates = []
-
+# Stores the result of the source code analysis. Dataset files in this list are mentioned in at least one code file.
 sc_dataset_analysis = []
-
+# Stores the overall dataset analysis result.
 dataset_analysis_result = []
 
-# TODO: doc
 
-# Checks if .csv/images are in the possible dataset folders
-# We use the retrieved directories from the structure analysis
-
-
-# returns a list of files inside directory path incl subdirectories
+# returns a list of files inside the provided directory path including subdirectories
 def get_all_files_in_dir(dir_path):
     list_of_files = os.listdir(dir_path)
     all_files = list()
@@ -42,7 +37,15 @@ def get_all_files_in_dir(dir_path):
 # folder with 'data' / 'im' + 'g' in name + file name not matching regex -> add files to candidates list
 # files with data in name + file name not matching regex -> add files to candidates list
 def analyse_datasets():
-    dataset_folders.extend(filter_repository_artefacts.get_dataset_folders())
+    """
+        Firstly, for all the found dataset folders the containing files are stored. For each found file: If the name of
+        it does not match the reg_ext, which excludes .py, .ipynb and .md files because they are for sure not datasets,
+        the file will be stored in the dataset_file_candidates list. Also, all files in the repository with 'data' in
+        the name will be stored there too. This list will be used by the source_code_analysis module in order to check
+        which of these candidates are actually mentioned in the source code. For these matches we then assume that they
+        are actual datasets.
+    """
+    dataset_folders.extend(filter_repository_artifacts.get_dataset_folders())
     for candidate in dataset_folders:
         dir_path = candidate[1]
         all_files = get_all_files_in_dir(dir_path)
@@ -52,14 +55,11 @@ def analyse_datasets():
             else:
                 file_name = file
 
-            # adding files inside folder named ?data? or ?im(a)g? excluding ones that match the regex
+            # adding files inside the found dataset folder(s) excluding ones that match the regex
             if (file_name not in dataset_file_candidates) and (not bool(re.match(reg_ext, file_name))):
                 dataset_file_candidates.append(file_name)
 
-    # add files who are named ?data?.? and who do not end with .py etc (see above)
-    # get all files with ?data?.? in name from filter repo structure
-    # add them to dataset_file_candidates list if not already in it
-    files_w_data_in_name = filter_repository_artefacts.get_files_name_data()
+    files_w_data_in_name = filter_repository_artifacts.get_files_name_data()
 
     for f in files_w_data_in_name:
         file_name = f[0]
@@ -80,6 +80,16 @@ def calculate_percentage(value1, value2):
 
 
 def build_dataset_response(mentioned_dataset_files_in_sc, verbose):
+    """
+        Builds the overall dataset analysis result using the stored information, and the found mentions of dataset file
+        candidates in the source code (mentioned_dataset_files_in_sc). Prints the result out in the command line and
+        stores it in the dataset_analysis_result. If verbose is specified, prints out additional information.
+
+        Parameters:
+            mentioned_dataset_files_in_sc (List[str]): A list of all the found dataset file candidates who are
+            mentioned in the source code.
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+    """
     number_of_dataset_file_candidates = 0
     number_of_dataset_folder_candidates = 0
     number_of_dataset_files_mentioned_sc = 0
@@ -123,6 +133,7 @@ def build_dataset_response(mentioned_dataset_files_in_sc, verbose):
     console.print(table)
     print('\n')
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
 
         if dataset_folders:
