@@ -65,7 +65,7 @@ def get_relevant_artifacts(local_repo_dir_path, verbose):
             source_code_files.append(f)
         elif file_extension == '.py':
             source_code_files.append(f)
-        elif file_extension in ms_extensions:
+        elif (file_extension in ms_extensions) or (file_name == 'model'):
             ms_files.append(f)
         elif 'readme' in file_name:
             readme.append(f)
