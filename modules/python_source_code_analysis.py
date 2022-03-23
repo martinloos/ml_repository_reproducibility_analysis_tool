@@ -8,10 +8,26 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 
-# TODO: doc
-
 
 def python_code_analysis(file_name, file_path, dataset_candidates, verbose):
+    """
+        Firstly, it is checked if the python source code file has the .ipynb extension. If yes, it is converted into a
+        .py file using nbconvert. Then, the .py file is processed line by line. All comment, code and import lines are
+        each stored in a separate list. For code lines we also check if a random seed is declared in the current line
+        or if one of the dataset_candidates is mentioned. For all the import lines we check whether hyperparameter
+        logging relevant imports are made. For all the code lines we check whether hyperparameter logging relevant code
+        is declared. If yes, these are stored into lists. Also, the pylint rating is calculated for the .py file using
+        pylint. Further statistical measurements are taken.
+
+        Parameters:
+            file_name (str): The name of the python source code file.
+            file_path (str): The path to the python source code file.
+            dataset_candidates (List[str]): A list of all the possible dataset files.
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+
+        Returns:
+            analysis_result (List): A list with all the measured analysis entries.
+    """
     f_name = file_name
     file_directory = get_file_directory(file_path)
     os.chdir(file_directory)
@@ -122,7 +138,6 @@ def python_code_analysis(file_name, file_path, dataset_candidates, verbose):
         footer_comment = len(footer_comments)
 
     hp_import_indicators = check_import_hyperparameter_indicators(import_lines)
-
     hp_logging_ind = check_code_hyperparameter_indicators(code_lines, hp_import_indicators)
 
     # number of found imports and logging usages that possibly correlate to hyperparameter logging
@@ -143,14 +158,18 @@ def python_code_analysis(file_name, file_path, dataset_candidates, verbose):
     number_of_fixed_random_seed_lines = len(fixed_random_seed_lines)
     number_of_random_seed_lines = number_of_fixed_random_seed_lines + len(unfixed_random_seed_lines)
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
         build_feedback(code_lines, comment_lines, import_lines, number_of_code_lines, number_of_comment_lines,
                        f_name, file, pylint_rating, fixed_random_seed_lines, unfixed_random_seed_lines,
                        hp_import_indicators, hp_logging_ind, ms_indicators)
 
-    return [number_of_code_lines, number_of_comment_lines, pylint_rating, total_sc_lines, header_comment,
-            footer_comment, is_jupyter_notebook, number_of_random_seed_lines, number_of_fixed_random_seed_lines,
-            number_of_hp_doc_indicator, import_lines, mentioned_dataset_candidates, number_of_ms_indicator]
+    analysis_result = [number_of_code_lines, number_of_comment_lines, pylint_rating, total_sc_lines, header_comment,
+                       footer_comment, is_jupyter_notebook, number_of_random_seed_lines,
+                       number_of_fixed_random_seed_lines, number_of_hp_doc_indicator, import_lines,
+                       mentioned_dataset_candidates, number_of_ms_indicator]
+
+    return analysis_result
 
 
 # removing file name
@@ -379,8 +398,10 @@ def build_feedback(code_lines, comment_lines, imp_lines, number_of_code_lines, n
     console.print(table)
     print('\n')
 
+    # TODO: remove commented out lines below IF you want to print out all the code and comment lines for each python
+    # TODO: source code file. commented out, because of massive overhead when analyzing big repositories.
     # print additional information to console if verbose mode
-    #if code_lines:
+    # if code_lines:
     #    table = Table(show_header=True, header_style="bold green")
     #    table.add_column("SOURCE CODE LINES", justify="left")
     #    for code_line in code_lines:
@@ -388,7 +409,7 @@ def build_feedback(code_lines, comment_lines, imp_lines, number_of_code_lines, n
     #    console.print(table)
     #    print('\n')
 
-    #if comment_lines:
+    # if comment_lines:
     #    table = Table(show_header=True, header_style="bold green")
     #    table.add_column("SOURCE CODE COMMENTS", justify="left")
     #    for comment in comment_lines:
