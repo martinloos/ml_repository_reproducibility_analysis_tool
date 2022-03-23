@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
-# TODO: doc
-
 import logging
 import requests
-import modules.filter_repository_artefacts as filter_repository_artefacts
+import modules.filter_repository_artifacts as filter_repository_artifacts
 import re
 from rich import print
 from rich.console import Console
@@ -16,29 +14,42 @@ from charset_normalizer import detect
 regex = r'(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\\\'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))'
 
 logger = logging.getLogger('log')
-
+# checking links in each readme if they contain one of these keywords
+# (if yes, we assume they link to a paper publication)
 list_of_paper_url_keywords = ['doi', 'arxiv', 'jmlr', 'ieeexplore',
                               'springer', 'igi-global', 'citeseerx',
                               'morganclaypool', 'openaccess', 'proceedings',
                               'dl.acm', 'researchgate', 'aaai.org',
                               'annualreviews']
-
 # if the detected possible paper url ends with one of these types it's not a paper link
 # e.g. maybe it's a png referenced from one of the sites above
 file_types = {'.txt', '.jpeg', '.jpg', '.png', '.gif'}
-
+# checking if a binder badge is included in a readme file
 binder_badge_keyword = '![Binder]'
-
+# Stores the name, file_path, length and whether it includes a binder badge for each readme file
 readme_data = []
+# Stores all the found links in the readme file(s)
 readme_links = []
+# Stores all the found paper links in the readme file(s)
 readme_paper_links = []
+# Stores all links which are not accessible
 inaccessible_readme_links = []
-
+# Stores the overall result of the readme file(s) analysis
 readme_analysis = []
 
 
 def analyse_readme(verbose):
-    readme = filter_repository_artefacts.get_readme()
+    """
+        Firstly, all the found readme file(s) are collected from the filter_repository_artifacts module. For each
+        readme file the following properties are analyzed: Length, links, and the inclusion of a binder badge. All the
+        links will be checked whether they are accessible or not. Also, if they are paper links. Lastly, the overall
+        result is built, and the result is printed out in the command line. If verbose is specified, additional
+        information is printed out.
+
+        Parameters:
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+    """
+    readme = filter_repository_artifacts.get_readme()
     counter = 1
     if readme:
         for file in readme:
@@ -179,6 +190,7 @@ def build_readme_response(verbose):
     console.print(table)
     print('\n')
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
         print('\n\n')
         print('[bold] ____________________________________________________________[/bold]')
