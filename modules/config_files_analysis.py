@@ -1,46 +1,57 @@
 #!/usr/bin/python3
 
 import re
-
-import modules.filter_repository_artefacts as filter_repository_artefacts
+import modules.filter_repository_artifacts as filter_repository_artifacts
 import modules.source_code_analysis as source_code_analysis
 from rich import print
 from rich.console import Console
 from rich.table import Table
 
-# TODO: doc
-
+# Stores the result of the configuration file(s) analysis
 config_analysis_result = []
-
+# Stores the found configuration file(s)
 config_files = []
+# Stores unique (duplicates will be eliminated) imports from the found configuration file(s)
 all_unique_lib_imports = []
+# Stores unique strict (==) imports from the found configuration file(s)
 strict_lib_imports = []
+# Stores unique but not strict imports from the found configuration file(s)
 specified_not_strict_imports = []
+# Stores the os if one is specified in a configuration file
 list_of_specified_os = []
-
+# List of used imports in the source code (python standard library imports are excluded)
 source_code_imports = []
-
+# Stores the imports that are used in the source code but in no configuration file
 used_but_not_in_config = []
+# Stores the imports that are used in the source code and are also defined in a configuration file
 used_and_in_config = []
-
-# Checks if used libraries in the source code are specified
-# Checks if versions are specified
-# Checks if libraries are public
 
 
 def analyse_config_files(verbose):
+    """
+        Firstly, collects all the found import lines from the source code analysis. Then, retrieves all the defined
+        imports in the found configuration file(s). Checks for the defined imports in the configuration file(s) if they
+        are strict or not. Compares both data lists against each other in order to determine if relevant source code
+        imports are specified. Stores the result in the config_analysis_result and prints out the analysis result in
+        the command line. If verbose is specified, additional information will be printed out too.
+
+        Parameters:
+            verbose (int): Default = 0 if verbose (additional command line information) off.
+    """
+    # collecting the found imports from the source code analysis
     sc_imports = source_code_analysis.get_imports()
     source_code_imports.extend(sc_imports)
+    # collecting all imports from the found configuration files
     retrieve_all_config_imports()
-
+    # comparing the source code imports with the defined configuration file imports
     compare_config_imp_with_sc_imp()
-
+    # builds result and prints it out in the command line if verbose is on
     build_config_analysis_result(verbose)
 
 
-# 1 collect all imports from config files
+# collect all imports from config files
 def retrieve_all_config_imports():
-    config_files.extend((filter_repository_artefacts.get_config_files()))
+    config_files.extend((filter_repository_artifacts.get_config_files()))
 
     if not config_files:
         print(':pile_of_poo: [bold red]No config file(s) detected.[/bold red]')
@@ -54,8 +65,9 @@ def retrieve_all_config_imports():
         error = 0
 
         # e.g. https://github.com/KristiyanVachev/Leaf-Question-Generation will throw UnicodeDecodeError
-        # but works with other solution whereas https://github.com/dmitrijsk/AttentionHTR works with the first
+        # Works with other solution whereas https://github.com/dmitrijsk/AttentionHTR works with the first
         # solution better (most repos work with the first one already, so the other is just a backup solution)
+        # This could probably be fixed similar to the solution in the readme_analysis where we detect the encoding type.
         try:
             config_text = open(file_path, "r")
             config_read = config_text.readlines()
@@ -93,9 +105,8 @@ def retrieve_all_config_imports():
             retrieve_imports_from_dockerfile(config_lines)
 
 
-# developed against: https://github.com/iterative/example-get-started/blob/master/src/requirements.txt
-# and: https://github.com/tirthajyoti/Machine-Learning-with-Python/blob/master/Deployment
-# /Linear_regression/requirements.txt
+# developed against: https://github.com/iterative/example-get-started/blob/master/src/requirements.txt,
+# https://github.com/tirthajyoti/Machine-Learning-with-Python/blob/master/Deployment/Linear_regression/requirements.txt
 def retrieve_imports_from_requirements(config_lines):
     for line in config_lines:
         line = line.replace('\n', '').replace(' ', '').replace('\\', '')
@@ -169,7 +180,7 @@ def retrieve_imports_from_env_yml(config_lines):
 
 
 # developed against: https://github.com/kubeflow/examples
-# TODO: improve precision (not all found cases covered)
+# TODO: improve precision (not all found cases covered). Dockerfiles can have quite different structure.
 def retrieve_imports_from_dockerfile(config_lines):
 
     pip_install_section = 0
@@ -203,10 +214,8 @@ def retrieve_imports_from_dockerfile(config_lines):
             if imp not in all_unique_lib_imports:
                 all_unique_lib_imports.append(imp)
 
-    # OS? FROM ubuntu:16.04 -> if os specified -> which version + which file
-    # RUN pip .... \ till && everything between -> remove all \ and whitespace
 
-
+# found that these imports are often declared with another name in the config file than used when importing in the code
 def replace_config_imp_name(imp_line):
     if 'scikit-learn' in imp_line:
         imp_line = imp_line.replace('scikit-learn', 'sklearn')
@@ -227,7 +236,7 @@ def extract_lib_name_from_requirements(imp_line):
     return imp_lib
 
 
-# 3 check how many of the used libraries are specified in the configs
+# check how many of the used libraries are specified in the configs
 def compare_config_imp_with_sc_imp():
     for imp in source_code_imports:
         imp_tmp = imp.lower()
@@ -246,7 +255,8 @@ def get_config_analysis_result():
     return config_analysis_result
 
 
-# TODO: % publicly available libraries of all used
+# builds the result and prints it out in the command line.
+# if verbose is specified additional information will be provided.
 def build_config_analysis_result(verbose):
     number_of_config_files = len(config_files)
 
@@ -300,6 +310,7 @@ def build_config_analysis_result(verbose):
     console.print(table)
     print('\n')
 
+    # if verbose specified in terminal command prints out additional information
     if verbose == 1:
 
         if all_unique_lib_imports:
@@ -350,5 +361,3 @@ def build_config_analysis_result(verbose):
                 table.add_row(lib)
             console.print(table)
             print('\n')
-
-
