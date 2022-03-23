@@ -1,19 +1,19 @@
 #!/usr/bin/python3
 
-# TODO: doc
-
 import subprocess
 import json
 import time
 from rich import print
 
-# Change IP/URL at front to use
+# Modify this URL (replace IP with your URL/IP). Do not remove the '/build/gh/' part as this is the API path.
 BINDERHUB_BASE_URL = '10.100.198.221/build/gh/'
-
+# Stores the result of the analysis. Can be: 'BinderHub not reachable', 'Yes' in case the repository is buildable
+# or 'No' if it is not.
 result = []
 
 
 def get_result():
+    # No result is present (e.g. something went wrong). We assume that the repository is not buildable.
     if not result:
         result.append('No')
 
@@ -21,10 +21,20 @@ def get_result():
 
 
 def call_binderhub_to_build(repo_owner, repo_name):
-    print('If the rate limit is exceeded can take up to 1 hour ...\n')
+    """
+        Firstly, tests if the specified BinderHub URL is reachable. If yes, calls this URL and tries to build the
+        provided repository. Depending on the repository size, and the BinderHub resources this can take more or less
+        time.
 
+        Parameters:
+            repo_owner (str): Name of the owner of the repository.
+            repo_name (str): Name of the repository.
+    """
+    # Can happen if you use this tool in a loop to perform analysis on many repositories.
+    print('If the rate limit is exceeded can take up to 1 hour ...\n')
     print('[bold green]Testing if binderhub reachable ...[/bold green]\n')
 
+    # default value
     ootb_buildable = 'No'
 
     if 'http' in BINDERHUB_BASE_URL:
@@ -47,8 +57,8 @@ def call_binderhub_to_build(repo_owner, repo_name):
         print('\n:pile_of_poo: [bold red]Binderhub not reachable. Check base url: [/bold red]' + binderhub_url + '\n')
         ootb_buildable = 'BinderHub not reachable'
 
-    # if Dockerfile present: Binder expects very specific use of it check documentation
-    # otherwise it's very likely that the container will crash
+    # If Dockerfile present: Binder expects very specific use of it check documentation
+    # Otherwise, it's very likely that the container will crash
     # https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html
     url = BINDERHUB_BASE_URL + repo_owner + '/' + repo_name + '/HEAD'
     commands = ['curl', '-H', '"Accept: application/json"', '--connect-timeout', '120', '--max-time', '1200',
@@ -56,6 +66,7 @@ def call_binderhub_to_build(repo_owner, repo_name):
 
     finished_build_call = 0
 
+    # terminates if the build call has been finished, and we got either a positive or negative result
     while (finished_build_call == 0) & (binderhub_reachable == 1):
         cmd = subprocess.Popen(commands, stdout=subprocess.PIPE)
         out, err = cmd.communicate()
@@ -93,4 +104,3 @@ def call_binderhub_to_build(repo_owner, repo_name):
                                 ootb_buildable = 'No'
 
     result.append(ootb_buildable)
-
