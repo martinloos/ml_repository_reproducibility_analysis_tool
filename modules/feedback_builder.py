@@ -66,9 +66,9 @@ def source_code_availability_documentation_feedback(analysis_result):
     code_comment_ratio_weight = 0.3
 
     # processing license
-    nbr_licenses = analysis_result[8]
+    nbr_licenses = analysis_result[9]
     # ranging from 0 to nbr_licenses
-    nbr_os_licenses = analysis_result[9]
+    nbr_os_licenses = analysis_result[10]
     license_value = calculate_license_value(nbr_licenses, nbr_os_licenses)
     weighted_license_value = round(license_value * total_license_weight, 2)
 
@@ -80,7 +80,7 @@ def source_code_availability_documentation_feedback(analysis_result):
     # processing pylint scoring
     # should be more generalised for other source code types
     # TODO: user feedback on how to improve (if necessary)
-    avg_pylint_score = analysis_result[17]
+    avg_pylint_score = analysis_result[18]
     pylint_value = range_normalization(avg_pylint_score, -10, 10, 0, 1)
 
     sc_feedback.append('3. Source-code pylint rating (score: '
@@ -94,7 +94,7 @@ def source_code_availability_documentation_feedback(analysis_result):
     # processing code comment ratio
     # for code comment ratio: > BL bad but < BL also bad should be value approx = BL
     # TODO: user feedback on how to improve (if necessary)
-    code_comment_ratio = analysis_result[16]
+    code_comment_ratio = analysis_result[17]
     # 1 - method result because of if code comment ratio < BL_CODE_COMMENT_RATIO it's good
     # less code lines per comment line (usually) means better explanation
     code_comment_ratio_value = (1 - range_normalization(code_comment_ratio, BL_CODE_COMMENT_RATIO,
@@ -229,18 +229,18 @@ def software_environment_feedback(analysis_result):
     pct_mentioned_to_all_used_weight = 0.4
     pct_public_source_code_imports_weight = 0.2
 
-    nbr_config_files = analysis_result[26]
+    nbr_config_files = analysis_result[27]
     # TODO: replace this value with baseline (how many imports in config are normal for reproducible repos)
-    nbr_imports_in_sc = analysis_result[29]
+    nbr_imports_in_sc = analysis_result[30]
 
     # TODO: user feedback on how to improve (if necessary)
     if nbr_config_files > 0:
         # how many imports in config
-        nbr_imports_in_config = analysis_result[28]
+        nbr_imports_in_config = analysis_result[29]
         # how many of those are strict specified (==)
-        pct_strict_imports_in_config = analysis_result[30]
+        pct_strict_imports_in_config = analysis_result[31]
         # how many of the used imports in source code are mentioned in config
-        pct_mentioned_to_all_used = analysis_result[32]
+        pct_mentioned_to_all_used = analysis_result[33]
         if nbr_imports_in_sc == 0:
             nbr_imports_in_config_val = 1
             pct_mentioned_to_all_used_val = 1
@@ -312,7 +312,7 @@ def software_environment_feedback(analysis_result):
                                'environment. We expect from a good config file to strictly specify all library '
                                'versions and to cover all of the used libraries used in the source code.\n')
 
-    pct_public_source_code_imports = analysis_result[25]
+    pct_public_source_code_imports = analysis_result[26]
     pct_public_source_code_imports_val = range_normalization(pct_public_source_code_imports, 0, 100, 0, 1) \
                                          * pct_public_source_code_imports_weight
 
@@ -356,7 +356,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
     pct_mentioned_found_weight = 0.2
 
     # dataset file candidates (if 0 -> 0 overall)
-    dataset_file_candidates = analysis_result[35]
+    dataset_file_candidates = analysis_result[36]
     if dataset_file_candidates == 0:
         ds_feedback.append('Dataset availability and documentation rating (score: 0 out of 1.0): '
                            'No dataset file candidate(s) found. If you have provided a dataset in your repository '
@@ -385,7 +385,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                            + ' dataset file candidates in the repository.\n')
 
         # # dataset file candidates mentioned in source code
-        ds_file_candidates_mentioned_in_sc = analysis_result[36]
+        ds_file_candidates_mentioned_in_sc = analysis_result[37]
         ds_file_candidates_mentioned_in_sc_val = round(range_normalization(ds_file_candidates_mentioned_in_sc,
                                                                      0, max_val_mentioned, 0, 1) * mentioned_weight, 2)
 
@@ -401,7 +401,7 @@ def dataset_availability_preprocessing_feedback(analysis_result):
 
         # % mentioned in relation to all
         # of all found dataset file candidates how many of them were in the source-code
-        pct_ds_candidates_mentioned_to_all_found = analysis_result[37]
+        pct_ds_candidates_mentioned_to_all_found = analysis_result[38]
         pct_ds_candidates_mentioned_to_all_found_val = round(range_normalization(
             pct_ds_candidates_mentioned_to_all_found, 0, 100, 0, 1) * pct_mentioned_found_weight, 2)
 
@@ -432,9 +432,9 @@ def dataset_availability_preprocessing_feedback(analysis_result):
 
 def random_seed_feedback(analysis_result):
     # how many declaration lines of random seed found
-    nbr_rdm_seed_lines = analysis_result[21]
+    nbr_rdm_seed_lines = analysis_result[22]
     # how many random seed lines of the found are fixing the seed
-    pct_fixed_rdm_seed_lines = analysis_result[22]
+    pct_fixed_rdm_seed_lines = analysis_result[23]
 
     random_seed_val = 1
     # if no random seed in code -> perfectly fine (no randomness)
@@ -463,7 +463,7 @@ def random_seed_feedback(analysis_result):
 
 
 def model_serialization_feedback(analysis_result):
-    ms_used = analysis_result[23]
+    ms_used = analysis_result[24]
     ms_val = 0
     if ms_used == 'Yes':
         ms_val = 1
@@ -485,7 +485,7 @@ def model_serialization_feedback(analysis_result):
 
 def hyperparameter_feedback(analysis_result):
     # only really important if no model serialization -> because if model serialised: all hp's documented anyways
-    nbr_hp_indicators = analysis_result[24]
+    nbr_hp_indicators = analysis_result[25]
     hp_val = 0
 
     if nbr_hp_indicators > 0:
@@ -517,7 +517,7 @@ def hyperparameter_feedback(analysis_result):
 
 
 def out_of_the_box_buildability_feedback(analysis_result):
-    ootb_buildable = analysis_result[38]
+    ootb_buildable = analysis_result[39]
 
     # TODO: user feedback on how to improve (if necessary)
     if ootb_buildable == 'BinderHub not reachable':
