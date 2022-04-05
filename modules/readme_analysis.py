@@ -41,10 +41,11 @@ readme_analysis = []
 def analyse_readme(verbose):
     """
         Firstly, all the found readme file(s) are collected from the filter_repository_artifacts module. For each
-        readme file the following properties are analyzed: Length, links, and the inclusion of a binder badge. All the
-        links will be checked whether they are accessible or not. Also, if they are paper links. Lastly, the overall
-        result is built, and the result is printed out in the command line. If verbose is specified, additional
-        information is printed out.
+        readme file the following properties are analyzed: Length, links, the inclusion of a binder badge, and checks
+        if a 'data' section, or a reference to a known dataset (see assets/dataset_names.txt) is in at least one of the
+        readmes. All the links will be checked whether they are accessible or not. Also, if they are paper links.
+        Lastly, the overall result is built, and the result is printed out in the command line. If verbose is
+        specified, additional information is printed out.
 
         Parameters:
             verbose (int): Default = 0 if verbose (additional command line information) off.
@@ -56,14 +57,16 @@ def analyse_readme(verbose):
             readme_name = file[0]
             readme_file_path = file[1]
             logger.info('Processing readme ' + str(counter) + ' out of ' + str(len(readme)) + ' (' + readme_name + ')')
-
             encoding = get_encoding(readme_file_path)
-
+            readme_text = parse_readme_text(readme_file_path, encoding)
+            readme_text_lst = parse_readme_lst(readme_file_path, encoding)
+            # from here analysis method calls
             length = readme_length(readme_file_path, encoding)
-            links = get_readme_links(readme_file_path, encoding)
+            links = get_readme_links(readme_text)
             test_readme_links(links, readme_file_path)
-            has_binder_badge = check_binder_badge(readme_file_path, encoding)
-            readme_files = [readme_name, readme_file_path, length, has_binder_badge]
+            has_binder_badge = check_binder_badge(readme_text)
+            has_dataset_mentioned = check_data_section_text(readme_text_lst)
+            readme_files = [readme_name, readme_file_path, length, has_binder_badge, has_dataset_mentioned]
             readme_data.append(readme_files)
             counter = counter + 1
         build_readme_response(verbose)
@@ -79,6 +82,22 @@ def get_encoding(readme_path):
     return encoding
 
 
+def parse_readme_text(readme_path, encoding_type):
+    readme_file = open(readme_path, "r", encoding=encoding_type)
+    readme_text = readme_file.read()
+    readme_file.close()
+
+    return readme_text
+
+
+def parse_readme_lst(readme_path, encoding_type):
+    readme_file = open(readme_path, "r", encoding=encoding_type)
+    readme_text = readme_file.readlines()
+    readme_file.close()
+
+    return readme_text
+
+
 def readme_length(readme_path, encoding_type):
     i = 0
     with open(readme_path, encoding=encoding_type) as r:
@@ -87,21 +106,14 @@ def readme_length(readme_path, encoding_type):
     return i + 1
 
 
-def get_readme_links(readme_file_path, encoding_type):
-    readme_file = open(readme_file_path, "r", encoding=encoding_type)
-    readme_text = readme_file.read()
-    readme_file.close()
-
+def get_readme_links(readme_text):
     return re.findall(regex, readme_text)
 
 
-def check_binder_badge(readme_file_path, encoding_type):
+def check_binder_badge(readme_text):
     is_present = 0
-    readme_file = open(readme_file_path, "r", encoding=encoding_type)
-    readme_text = readme_file.read()
     if binder_badge_keyword in readme_text:
         is_present = 1
-    readme_file.close()
     return is_present
 
 
@@ -114,10 +126,11 @@ def test_readme_links(links, file_path):
                 link = 'https://' + link
             lower_case_link = link.lower()
             check_if_link_from_paper_publisher(lower_case_link)
-            r = requests.get(link)
-            if str(r.status_code) == '404':
-                inaccessible_readme_link = link, file_path
-                inaccessible_readme_links.append(inaccessible_readme_link)
+            if '.zip' not in link:
+                r = requests.get(link)
+                if str(r.status_code) == '404':
+                    inaccessible_readme_link = link, file_path
+                    inaccessible_readme_links.append(inaccessible_readme_link)
         except requests.ConnectionError as exception:
             inaccessible_readme_link = link, file_path
             inaccessible_readme_links.append(inaccessible_readme_link)
@@ -134,6 +147,68 @@ def check_if_link_from_paper_publisher(link):
                 readme_paper_links.append(link)
 
 
+def parse_known_datasets():
+    # loading names of known datasets into list
+    dataset_names_file = open('assets/dataset_names.txt', "r", encoding='utf-8')
+    datasets_text_tmp = dataset_names_file.readlines()
+    dataset_names_file.close()
+
+    dataset_text = []
+
+    for line in datasets_text_tmp:
+        dataset_text.append(line.lower().replace('\n', ''))
+
+    return dataset_text
+
+
+def check_for_data_section(readme_text):
+    # stores content of 'data' sections in the readme file in list
+    reg = "(.*?data.*?|.*?dataset.*?)"
+    data_set_section = 0
+    data_set_section_text = []
+
+    for line in readme_text:
+        line_tmp = line.lower().strip()
+        if (line_tmp.startswith('#')) and (bool(re.match(reg, line_tmp))):
+            data_set_section = 1
+        elif line_tmp.startswith('#'):
+            data_set_section = 0
+        elif data_set_section == 1:
+            data_set_section_text.append(line_tmp)
+
+    return data_set_section_text
+
+
+def check_data_section_text(readme_text):
+    # checks if either at least one link is found in a "data (set)" section of the readme
+    # or if we find a known dataset reference in the readme text
+    found_mentioned_ds = 0
+    data_section_text_lst = check_for_data_section(readme_text)
+
+    data_section_string = ''.join(map(str, data_section_text_lst))
+
+    if data_section_string:
+        data_section_links = re.findall(regex, data_section_string)
+
+        if data_section_links:
+            found_mentioned_ds = 1
+
+    # no links in data section found, we then check if one of the datasets from assets/dataset_names.txt mentioned
+    if found_mentioned_ds == 0:
+        # parse dataset names from txt file
+        popular_dataset_lst = parse_known_datasets()
+        readme_text_string = ''.join(map(str, readme_text))
+
+        for popular_dataset in popular_dataset_lst:
+            if (found_mentioned_ds == 0) and (popular_dataset in readme_text_string):
+                found_mentioned_ds = 1
+
+    if found_mentioned_ds == 1:
+        return 1
+
+    return 0
+
+
 def get_readme_analysis():
     return readme_analysis
 
@@ -147,12 +222,15 @@ def build_readme_response(verbose):
     readme_length_sum = 0
     readme_with_binder_badge = []
     percentage_of_inaccessible_links = 0
+    found_dataset_reference = 0
 
     for element in readme_data:
         readme_length_sum = readme_length_sum + element[2]
         is_binder_badge_present = element[3]
         if is_binder_badge_present == 1:
             readme_with_binder_badge.append(element[1])
+        if element[4] == 1:
+            found_dataset_reference = 1
 
     average_readme_length = round(readme_length_sum / number_of_readmes, 2)
     total_number_of_links = len(readme_links)
@@ -169,6 +247,7 @@ def build_readme_response(verbose):
     readme_analysis.append(total_number_of_paper_links)
     readme_analysis.append(total_number_of_inaccessible_links)
     readme_analysis.append(percentage_of_inaccessible_links)
+    readme_analysis.append(found_dataset_reference)
 
     console = Console()
 
@@ -187,6 +266,10 @@ def build_readme_response(verbose):
     table.add_row('# paper links', str(total_number_of_paper_links))
     table.add_row('# not accessible links', str(total_number_of_inaccessible_links))
     table.add_row('% not accessible links', str(percentage_of_inaccessible_links))
+    if found_dataset_reference == 1:
+        table.add_row('Dataset section with reference', 'Yes')
+    else:
+        table.add_row('Dataset section with reference', 'No')
     console.print(table)
     print('\n')
 
