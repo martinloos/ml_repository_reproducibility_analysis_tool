@@ -80,8 +80,6 @@ def retrieve_all_config_imports():
         if error == 1:
             with open(file_path, "rb") as config_text:
                 conf_text_lines = config_text.read()
-                print('config file line: ')
-                print(conf_text_lines)
                 # thanks to https://stackoverflow.com/questions/67734203/reading-a-txt-and-getting-weird-behavior
                 dec_lines = conf_text_lines.decode('utf-16le', 'ignore')
                 dec_llist = dec_lines.split('\n')
