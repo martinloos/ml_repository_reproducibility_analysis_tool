@@ -7,6 +7,8 @@ import modules.result_builder as result_builder
 
 # Stores the result for all factors
 factor_result = []
+# For factors where the values can be between 1 or 0 we give additional feedback wether it is rather a good or bad score
+factor_context = []
 # Each list stores the feedback for the corresponding factor
 sc_feedback = []
 se_feedback = []
@@ -49,6 +51,18 @@ MAX_D_PUB_ACC_LIBS_IN_SC = 100
 SC_IMP_IN_CONF_WEIGHT = 0.6
 STRICT_DEPENDENCIES_WEIGHT = 0.2
 PUB_ACC_LIBS_IN_SC_WEIGHT = 0.2
+# Different thresholds to assess whether a repository complies with the guidelines or not
+# not needed for DSA&P as well as MS, HP logging and OOTBB as these values can either be 0 or 1
+# MID_ values are the average of the POS_ and NEG_ values
+TOP_SCAD_THLD = 0.8
+AVG_SCAD_THLD = 0.54
+LOW_SCAD_THLD = 0.28
+TOP_SE_THLD = 0.61
+AVG_SE_THLD = 0.46
+LOW_SE_THLD = 0.31
+TOP_RS_THLD = 0.94
+AVG_RS_THLD = 0.51
+LOW_RS_THLD = 0.51
 
 
 def build_feedback(feedback_file_path):
@@ -70,6 +84,8 @@ def build_feedback(feedback_file_path):
     ms_val = model_serialization_feedback(analysis_result)
     hp_val = hyperparameter_feedback(analysis_result)
     bh_val = out_of_the_box_buildability_feedback(analysis_result)
+
+    build_factor_context(sc_val, se_val, ds_val, rs_val, ms_val, hp_val, bh_val)
 
     build_feedback_file(feedback_file_path)
 
@@ -131,7 +147,7 @@ def source_code_availability_documentation_feedback(analysis_result):
 
     sc_availability_documentation_value = round(weighted_license_value + weighted_readme_value + weighted_pylint_value
                                                 + weighted_code_comment_ratio_value, 2)
-    factor_result.append('Source-code availability and documentation: ' + str(sc_availability_documentation_value))
+
     return sc_availability_documentation_value
 
 
@@ -219,7 +235,8 @@ def calculate_readme_value(analysis_result):
                            'least ' + str(MAX_D_README_LENGTH) + ' lines. Make sure to also add useful links e.g. a '
                                                                  'paper link. We determined that '
                            + str(MAX_D_ACC_README_LINKS) + ' or more accessible links are best. Make also sure that '
-                                                           'all provided links are correct and reachable. Also add a binder badge if possible '
+                                                           'all provided links are correct and reachable. Also add a '
+                                                           'binder badge if possible '
                                                            '(see out-of-the-box buildability feedback.)\n')
         return 0
 
@@ -250,7 +267,7 @@ def software_environment_feedback(analysis_result):
                            + str(pct_mentioned_to_all_used)
                            + '% of the used libraries are defined in the config file(s). We expect that '
                            + str(MAX_D_SC_IMP_IN_CONF) + '% of the in the source-code used relevant libraries are'
-                           ' defined in the config file(s).\n')
+                                                         ' defined in the config file(s).\n')
 
         # check how many of the declarations are version strict
         pct_strict_declarations_in_config = analysis_result[31]
@@ -263,7 +280,7 @@ def software_environment_feedback(analysis_result):
                            + str(strict_declarations_in_config_val)
                            + ' out of ' + str(STRICT_DEPENDENCIES_WEIGHT) + '): We expect that '
                            + str(MAX_D_STRICT_DEPENDENCIES) + '% of the defined libraries '
-                           'in the config file(s) are strictly (==) defined. We found '
+                             'in the config file(s) are strictly (==) defined. We found '
                            + str(nbr_imports_in_config)
                            + ' libraries in the config file(s). From these '
                            + str(pct_strict_declarations_in_config)
@@ -278,8 +295,9 @@ def software_environment_feedback(analysis_result):
                            '(score: '
                            + str(mentioned_to_all_used_val)
                            + ' out of ' + str(SC_IMP_IN_CONF_WEIGHT) + '): We found that '
-                           'no relevant imports are used in the source code so there is no need to define any imports '
-                           'in a configuration file.\n')
+                                                                       'no relevant imports are used in the source '
+                                                                       'code so there is no need to define any imports '
+                                                                       'in a configuration file.\n')
 
         # if declarations have been made they should be strict
         pct_strict_declarations_in_config = analysis_result[31]
@@ -292,7 +310,7 @@ def software_environment_feedback(analysis_result):
                            + str(strict_declarations_in_config_val)
                            + ' out of ' + str(STRICT_DEPENDENCIES_WEIGHT) + '): We expect that '
                            + str(MAX_D_STRICT_DEPENDENCIES) + '% of the defined libraries '
-                           'in the config file(s) are strictly (==) defined. We found '
+                             'in the config file(s) are strictly (==) defined. We found '
                            + str(nbr_imports_in_config)
                            + ' libraries in the config file(s). From these '
                            + str(pct_strict_declarations_in_config)
@@ -306,15 +324,20 @@ def software_environment_feedback(analysis_result):
 
         se_feedback.append('> Config file(s) scoring (score: 0 out of ' +
                            str((STRICT_DEPENDENCIES_WEIGHT + SC_IMP_IN_CONF_WEIGHT)) + '): No Config file(s) detected '
-                           'but we found '
+                                                                                       'but we found '
                            + str(nbr_imports_in_sc) + ' relevant source code imports which should be included in an '
-                           'configuration file. '
-                           'You should add one (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in '
-                           'order for others to reproduce your repository with the same software '
-                           'environment. We expect from a good config file to strictly specify all library '
-                           'versions and to cover all of the relevant libraries used in the source code. '
-                           'Relevant libraries are ones not included in the Python Standard Library (see: '
-                           'https://docs.python.org/3/library/) or local Python modules.\n')
+                                                      'configuration file. '
+                                                      'You should add one (e.g. requirements.txt, config.env, '
+                                                      'config.yaml, Dockerfile) in '
+                                                      'order for others to reproduce your repository with the same '
+                                                      'software '
+                                                      'environment. We expect from a good config file to strictly '
+                                                      'specify all library '
+                                                      'versions and to cover all of the relevant libraries used in '
+                                                      'the source code. '
+                                                      'Relevant libraries are ones not included in the Python Standard '
+                                                      'Library (see: '
+                                                      'https://docs.python.org/3/library/) or local Python modules.\n')
 
     # no config file present but also no relevant source code imports
     if (nbr_config_files <= 0) and (nbr_imports_in_sc <= 0):
@@ -326,13 +349,13 @@ def software_environment_feedback(analysis_result):
                            + str((STRICT_DEPENDENCIES_WEIGHT + SC_IMP_IN_CONF_WEIGHT))
                            + ' out of ' + str((STRICT_DEPENDENCIES_WEIGHT + SC_IMP_IN_CONF_WEIGHT))
                            + '): No Config file(s) detected but we also '
-                           'didnt find any relevant source code imports which should be included in an '
-                           'configuration file. If you include a not local Python module or one that is not included in'
-                           ' the Python Standard Library (see: https://docs.python.org/3/library/) please create a '
-                           'configuration file (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in '
-                           'order for others to reproduce your repository with the same software environment. '
-                           'We expect from a good config file to strictly specify all library '
-                           'versions and to cover all of the relevant libraries used in the source code. \n')
+                             'didnt find any relevant source code imports which should be included in an '
+                             'configuration file. If you include a not local Python module or one that is not included '
+                             'in the Python Standard Library (see: https://docs.python.org/3/library/) please create a '
+                             'configuration file (e.g. requirements.txt, config.env, config.yaml, Dockerfile) in '
+                             'order for others to reproduce your repository with the same software environment. '
+                             'We expect from a good config file to strictly specify all library '
+                             'versions and to cover all of the relevant libraries used in the source code. \n')
 
     # if relevant source code imports occurred check how many of them are publicly available
     if nbr_imports_in_sc > 0:
@@ -344,14 +367,15 @@ def software_environment_feedback(analysis_result):
         se_feedback.append('- Public available libraries in source code file(s) scoring (score: '
                            + str(public_source_code_imports_val)
                            + ' out of ' + str(PUB_ACC_LIBS_IN_SC_WEIGHT) + ': We expect all of the not local modules '
-                           'or standard python libraries to be publicly available. We found that '
+                             'or standard python libraries to be publicly available. We found that '
                            + str(pct_public_source_code_imports)
                            + '% are publicly available. We tested if the used library imports are accessible on '
-                           'https://pypi.org. If the score is not ' + str(PUB_ACC_LIBS_IN_SC_WEIGHT) + ' (=100%): '
-                           'Please try avoiding the use of '
-                           'not public libraries as third parties may not be able to use your repository. Please '
-                           'note: It is also possible that, if the score is not the maxima, all libraries are publicly '
-                           'available, but we could not find a match. If you are unsure please recheck manually.\n')
+                             'https://pypi.org. If the score is not ' + str(PUB_ACC_LIBS_IN_SC_WEIGHT) + ' (=100%): '
+                             'Please try avoiding the use of '
+                             'not public libraries as third parties may not be able to use your repository. Please '
+                             'note: It is also possible that, if the score is not the maxima, all libraries are '
+                             'publicly '
+                             'available, but we could not find a match. If you are unsure please recheck manually.\n')
 
     # no relevant imports in source code -> all of them are available
     else:
@@ -360,9 +384,9 @@ def software_environment_feedback(analysis_result):
         se_feedback.append('- Public available libraries in source code file(s) scoring (score: '
                            + str(PUB_ACC_LIBS_IN_SC_WEIGHT)
                            + ' out of ' + str(PUB_ACC_LIBS_IN_SC_WEIGHT) + ': We expect all of the not local modules '
-                           'or standard python libraries to be publicly available. We found no relevant source code '
-                           'imports, so 100% are publicly available. We would have tested if the used library imports '
-                           'are accessible on https://pypi.org.\n')
+                             'or standard python libraries to be publicly available. We found no relevant source code '
+                             'imports, so 100% are publicly available. We would have tested if the used library '
+                             'imports are accessible on https://pypi.org.\n')
 
     # build overall result
     se_feedback.append('> Software environment is calculated from the above identifiers. '
@@ -382,7 +406,6 @@ def software_environment_feedback(analysis_result):
 
     software_env_value = round(mentioned_to_all_used_val + strict_declarations_in_config_val +
                                public_source_code_imports_val, 2)
-    factor_result.append('Software environment: ' + str(software_env_value))
 
     return software_env_value
 
@@ -430,8 +453,6 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                        'dataset in any way please make sure to include either the final dataset or files to reproduce '
                        'the steps taken.')
 
-    factor_result.append('Dataset availability and preprocessing: ' + str(dataset_val))
-
     return dataset_val
 
 
@@ -465,7 +486,6 @@ def random_seed_feedback(analysis_result):
                            'value of it in order for others to use the same seed.'
                            'If you have not declared a seed please do so, and assign a specific value to it.')
 
-    factor_result.append('Random seed: ' + str(random_seed_val))
     return random_seed_val
 
 
@@ -493,8 +513,6 @@ def model_serialization_feedback(analysis_result):
                            'c) one of the following keywords in the source code: "torch.save()", "pickle.dump" or '
                            '"joblib".')
 
-    factor_result.append('Model serialization: ' + str(ms_val))
-
     return ms_val
 
 
@@ -521,7 +539,6 @@ def hyperparameter_feedback(analysis_result):
                            'where incremental improvements should be documented in order for others to understand '
                            'the steps taken.')
 
-    factor_result.append('Hyperparameter logging: ' + str(hp_val))
     return hp_val
 
 
@@ -556,7 +573,6 @@ def out_of_the_box_buildability_feedback(analysis_result):
                            'it may not be compatible with BinderHub. '
                            'Check: https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html')
 
-    factor_result.append('Out-of-the-box buildability: ' + str(binderhub_val))
     return binderhub_val
 
 
@@ -573,14 +589,107 @@ def range_normalization(input_value, min_value, max_value, min_range, max_range)
     return normalized_value
 
 
+def build_factor_context(sc_val, se_val, ds_val, rs_val, ms_val, hp_val, bh_val):
+    # context for source-code availability and documentation factor
+    if sc_val >= TOP_SCAD_THLD:
+        sc_context = 'Score higher than top threshold (T). Very good.'
+    elif sc_val > AVG_SCAD_THLD:
+        sc_context = 'Score higher than average threshold (A). Seems good. Some improvements recommended.'
+    # can be equal to MID
+    elif sc_val > LOW_SCAD_THLD:
+        sc_context = 'Score higher than lower threshold (L). Improvements should be made.'
+    # must be equal or less than NEG
+    else:
+        sc_context = 'Score lower than lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Source-code availability and documentation: ' + str(sc_val) + ' : ' + sc_context + ' : '
+                         + str(TOP_SCAD_THLD) + ' : ' + str(AVG_SCAD_THLD) + ' : ' + str(LOW_SCAD_THLD))
+    factor_context.append(sc_context)
+
+    # context for software environment factor
+    if se_val >= TOP_SE_THLD:
+        se_context = 'Score higher than top threshold (T). Very good.'
+    elif se_val > AVG_SE_THLD:
+        se_context = 'Score higher than average threshold (A). Seems good. Some improvements recommended.'
+    # can be equal to MID
+    elif se_val > LOW_SE_THLD:
+        se_context = 'Score higher than lower threshold (L). Improvements should be made.'
+    # must be equal or less than NEG
+    else:
+        se_context = 'Score lower than lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Software environment: ' + str(se_val) + ' : ' + se_context + ' : '
+                         + str(TOP_SE_THLD) + ' : ' + str(AVG_SE_THLD) + ' : ' + str(LOW_SE_THLD))
+    factor_context.append(se_context)
+
+    # dataset availability and preprocessing context
+    if ds_val == 1:
+        ds_context = 'Score equal to top threshold (T). Very good.'
+    else:
+        ds_context = 'Score equal to lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Dataset availability and preprocessing: ' + str(ds_val) + ' : ' + ds_context + ' : '
+                         + str(1) + ' : ' + '-' + ' : ' + str(0))
+
+    # random seed control context
+    if rs_val >= TOP_RS_THLD:
+        rs_context = 'Score higher than top threshold (T). Very good.'
+    elif rs_val > AVG_RS_THLD:
+        rs_context = 'Score higher than average threshold (A). Seems good. Some improvements recommended.'
+    # can be equal to MID
+    elif rs_val > LOW_RS_THLD:
+        rs_context = 'Score higher than lower threshold (L). Improvements should be made.'
+    # must be equal or less than NEG
+    else:
+        rs_context = 'Score lower than lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Random seed control: ' + str(rs_val) + ' : ' + rs_context + ' : '
+                         + str(TOP_RS_THLD) + ' : ' + str(AVG_RS_THLD) + ' : ' + str(LOW_RS_THLD))
+
+    # model serialization context
+    if ms_val == 1:
+        ms_context = 'Score equal to top threshold (T). Very good.'
+    else:
+        ms_context = 'Score equal to lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Model serialization: ' + str(ms_val) + ' : ' + ms_context + ' : '
+                         + str(1) + ' : ' + '-' + ' : ' + str(0))
+
+    # hyperparameter logging context
+    if hp_val == 1:
+        hp_context = 'Score equal to top threshold (T). Very good.'
+    else:
+        hp_context = 'Score equal to lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Hyperparameter logging: ' + str(hp_val) + ' : ' + hp_context + ' : '
+                         + str(1) + ' : ' + '-' + ' : ' + str(0))
+
+    # out-of-the-box buildability context
+    if bh_val == 1:
+        bh_context = 'Score equal to top threshold (T). Very good.'
+    else:
+        bh_context = 'Score equal to lower threshold (L). Major improvements should be made.'
+
+    factor_result.append('Out-of-the-box buildability: ' + str(bh_val) + ' : ' + bh_context + ' : '
+                         + str(1) + ' : ' + '-' + ' : ' + str(0))
+
+    # TODO: at the end append a line with * explaining where the threshold values are from
+    factor_context.append(rs_context)
+
+
 def build_feedback_file(file_path):
     feedback_txt = open(file_path, "w")
     feedback_txt.write('# REPRODUCIBILITY FACTOR SCORING (from 0 to 1): \n\n')
-    table = '| Reproducibility factor | Score |\n| ----------- | ----------- |\n'
+    table = '| Reproducibility factor | Score | Feedback | T* | A* | L* |\n| ----------- | ----------- | ----------- ' \
+            '| ----------- | ----------- | ----------- |\n'
     for element in factor_result:
         elements = element.split(':')
-        table = table + '| ' + str(elements[0]) + ' | ' + str(elements[1]) + ' |\n'
+        table = table + '| ' + str(elements[0]) + ' | ' + str(elements[1]) + ' | ' + str(elements[2]) + ' | ' \
+                + str(elements[3]) + ' | ' + str(elements[4]) + ' | ' + str(elements[5]) + ' |\n'
     feedback_txt.write(table)
+    thld_note = '\n> *: Thresholds computed from respective reproducible and non-reproducible sets of repositories. ' \
+                'More information on this in the associated thesis in chapter 6.'
+    feedback_txt.write(thld_note)
     feedback_txt.write('\n\n## SOURCE CODE AVAILABILITY AND DOCUMENTATION FEEDBACK\n\n')
     for element in sc_feedback:
         feedback_txt.write(element + "\n")
@@ -625,7 +734,7 @@ def print_reproducibility_factor_feedback(sc_availability_documentation_val, sof
     table.add_row('Dataset availability & preprocessing', str(dataset_availability_preprocessing_val))
     table.add_row('Random seed', str(random_seed_val))
     table.add_row('Model serialization', str(model_serialization_val))
-    table.add_row('Hyperparameter declaration', str(hyperparameter_val))
+    table.add_row('Hyperparameter logging', str(hyperparameter_val))
     table.add_row('Out of the box buildable with BinderHub', str(ootb_buildability_val))
     console.print(table)
     print('\n')
