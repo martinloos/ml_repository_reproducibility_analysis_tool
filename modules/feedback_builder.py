@@ -391,7 +391,7 @@ def software_environment_feedback(analysis_result):
     # build overall result
     se_feedback.append('> Software environment is calculated from the above identifiers. '
                        'Since these have a different influence on the overall result, they are weighted as '
-                       'follows:\n'
+                       'follows:\n\n'
                        + '- Source-code imports in config file weight: '
                        + str(SC_IMP_IN_CONF_WEIGHT) + '\n'
                        + '- Strict dependency declarations in config file weight: '
@@ -449,7 +449,8 @@ def dataset_availability_preprocessing_feedback(analysis_result):
                            'README but the tool has not detected it, move it into an separate section with "data" '
                            'in the name and provide the name of the dataset as well as the link to it.\n')
 
-    ds_feedback.append('> Dataset preprocessing detection is currently not implemented. But: If you preprocessed the '
+    ds_feedback.append('> Important note: Dataset preprocessing detection is currently not implemented. But: If you '
+                       'preprocessed the '
                        'dataset in any way please make sure to include either the final dataset or files to reproduce '
                        'the steps taken.')
 
@@ -696,6 +697,8 @@ def build_feedback_file(file_path):
     feedback_txt.write('\n\n## SOFTWARE ENVIRONMENT FEEDBACK\n\n')
     for element in se_feedback:
         feedback_txt.write(element + "\n")
+    # with pagebreak the exported .pdf from the created .md file looks prettier
+    feedback_txt.write('<div style="page-break-after: always; visibility: hidden"> \pagebreak </div>')
     feedback_txt.write('\n\n## DATASET AVAILABILITY AND PREPROCESSING FEEDBACK\n\n')
     for element in ds_feedback:
         feedback_txt.write(element + "\n")
