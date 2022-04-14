@@ -5,7 +5,7 @@
 | Source-code availability and documentation |  0.93  |  Score higher than top threshold (T). Very good.  |  0.8  |  0.54  |  0.28 |
 | Software environment |  0.93  |  Score higher than top threshold (T). Very good.  |  0.61  |  0.46  |  0.31 |
 | Dataset availability and preprocessing |  1  |  Score equal to top threshold (T). Very good.  |  1  |  -  |  0 |
-| Random seed control |  1.0  |  Score higher than top threshold (T). Very good.  |  0.94  |  0.51  |  0.51 |
+| Random seed control |  1.0  |  Score higher than top threshold (T). Very good.  |  0.94  |  0.73  |  0.51 |
 | Model serialization |  1  |  Score equal to top threshold (T). Very good.  |  1  |  -  |  0 |
 | Hyperparameter logging |  0  |  Score equal to lower threshold (L). Major improvements should be made.  |  1  |  -  |  0 |
 | Out-of-the-box buildability |  0  |  Score equal to lower threshold (L). Major improvements should be made.  |  1  |  -  |  0 |
