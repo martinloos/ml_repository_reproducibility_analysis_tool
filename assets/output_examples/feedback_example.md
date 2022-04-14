@@ -43,18 +43,19 @@
 - Public available libraries in source code file(s) scoring (score: 0.2 out of 0.2: We expect all of the not local modules or standard python libraries to be publicly available. We found that 100.0% are publicly available. We tested if the used library imports are accessible on https://pypi.org. If the score is not 0.2 (=100%): Please try avoiding the use of not public libraries as third parties may not be able to use your repository. Please note: It is also possible that, if the score is not the maxima, all libraries are publicly available, but we could not find a match. If you are unsure please recheck manually.
 
 > Software environment is calculated from the above identifiers. Since these have a different influence on the overall result, they are weighted as follows:
+
 - Source-code imports in config file weight: 0.6
 - Strict dependency declarations in config file weight: 0.2
 - Public libs in source code weight: 0.2
 
 > Important note: For our analysis we exclude python standard libraries (see: https://docs.python.org/3/library/) as well as local file imports. We also eliminate duplicates (if one import occurs in multiple files we count it as one).
-
+<div style="page-break-after: always; visibility: hidden"> \pagebreak </div>
 
 ## DATASET AVAILABILITY AND PREPROCESSING FEEDBACK
 
 Dataset availability and preprocessing scoring (score: 1.0 out of 1.0): Dataset file candidate(s) were mentioned in the source code. This is best practice, because one should always provide a dataset (if possible) in the repository in order for others to reproduce your repository with the same input data.
 
-> Dataset preprocessing detection is currently not implemented. But: If you preprocessed the dataset in any way please make sure to include either the final dataset or files to reproduce the steps taken.
+> Important note: Dataset preprocessing detection is currently not implemented. But: If you preprocessed the dataset in any way please make sure to include either the final dataset or files to reproduce the steps taken.
 
 
 ## RANDOM SEED FEEDBACK
