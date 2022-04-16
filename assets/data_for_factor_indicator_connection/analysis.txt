@@ -182,18 +182,18 @@ median: 3.43					median: 5.71
 PCT OPEN SOURCE LICENSE (No license = no open source license)
 
 NRS:						RS:
-0						0
-0						0
-0						100
-0						100
-0						100
-0						100
-0						100
-0						100
-0						100
-0						100
-0						100
-0						100
+0 no license					0 no license
+0 no license					0 no license
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
+0 no license					100
 100						100
 100						100
 100						100
@@ -208,6 +208,8 @@ min: 0, max: 100				min: 0, max: 100
 1/4: 0	 					1/4: 100
 3/4: 100					3/4: 100
 median: 0					median: 100
+
+all 100 if the repos which do not include a license are excluded
 
 
 
