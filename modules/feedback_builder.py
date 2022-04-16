@@ -33,7 +33,7 @@ README_WEIGHT = 0.5
 LICENSE_WEIGHT = 0.3
 # code comment ratio min(d), max(d) and weight. computed as 1 - range normalized value because a high ratio is not good
 MIN_D_CODE_COMMENT_RATIO = 8.73
-MAX_D_CODE_COMMENT_RATIO = 17.46
+MAX_D_CODE_COMMENT_RATIO = 16.18
 CODE_COMMENT_RATIO_WEIGHT = 0.1
 # pylint rating min(d), max(d) and weight
 MIN_D_PYLINT_RATING = 0
