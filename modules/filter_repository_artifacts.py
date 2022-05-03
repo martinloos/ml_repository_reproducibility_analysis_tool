@@ -59,26 +59,30 @@ def get_relevant_artifacts(local_repo_dir_path, verbose):
             dvc_folder.append(d)
 
     for f in files:
-        file_name = f[0].lower()
-        file_extension = pathlib.PurePosixPath(file_name).suffix
-        if file_extension == '.ipynb':
-            source_code_files.append(f)
-        elif file_extension == '.py':
-            source_code_files.append(f)
-        elif (file_extension in ms_extensions) or (file_name == 'model'):
-            ms_files.append(f)
-        elif 'readme' in file_name:
-            readme.append(f)
-        elif 'license' in file_name:
-            # for .doctree: UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 0: invalid
-            # start byte
-            if '.doctree' not in file_name:
-                repo_license.append(f)
-        elif 'data' in file_name:
-            files_named_data.append(f)
-        elif '.dockerignore' not in file_name:
-            if bool(re.match(config_file_reg, file_name)):
-                config_files.append(f)
+        file_path = f[1].lower()
+
+        # excluding all files where venv is in the file path because that are not actual relevant source code files
+        if 'venv' not in file_path:
+            file_name = f[0].lower()
+            file_extension = pathlib.PurePosixPath(file_name).suffix
+            if file_extension == '.ipynb':
+                source_code_files.append(f)
+            elif file_extension == '.py':
+                source_code_files.append(f)
+            elif (file_extension in ms_extensions) or (file_name == 'model'):
+                ms_files.append(f)
+            elif 'readme' in file_name:
+                readme.append(f)
+            elif 'license' in file_name:
+                # for .doctree: UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80 in position 0: invalid
+                # start byte
+                if '.doctree' not in file_name:
+                    repo_license.append(f)
+            elif 'data' in file_name:
+                files_named_data.append(f)
+            elif '.dockerignore' not in file_name:
+                if bool(re.match(config_file_reg, file_name)):
+                    config_files.append(f)
 
     # if verbose specified in terminal command prints out additional information
     if verbose == 1:
