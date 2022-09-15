@@ -147,7 +147,7 @@ In order to explain the interaction and the order of execution of the individual
 Presentation
 --------------------------
 
-Placeholder for describing and linking the presentation.
+[Thesis Presentation](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis_presentation.pdf)
 
 License
 --------------------------
