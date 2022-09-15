@@ -21,10 +21,10 @@ Description
 ---------------------
 This tool helps authors and developers of machine learning experiments as well as reviewers of third-party work. The aim is to increase the probability of reproducibility or to be able to estimate where possible problem areas are. As a result, high quality with regard to reproducibility can be ensured during development or before publication without great additional effort. In addition, a reviewer can quickly and easily examine properties of a machine learning repository in relation to reproducibility.
 
-This is made possible by the approach described in the [paper](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis.pdf) for connecting reproducibility factors with software-based recognition indicators. In simplified terms, this is done using the following approach:
+This is made possible by the approach described in the [paper]([https://git.fim.uni-passau.de/loosmartin](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis.pdf) for connecting reproducibility factors with software-based recognition indicators. In simplified terms, this is done using the following approach:
 
 1. Analysis of relevant indicators regarding the reproducibility of a machine learning repository.
-2. Based on the results of the analysis of two different sets of ML repositories (one containing reproducible and the other non-reproducible repositories), relevant indicators are identified. Representative values ​​and weighting are then assigned to these relevant indicators using statistical and heuristic methods. The analysis results of both sets can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/assets/data_for_factor_indicator_connection).
+2. Based on the results of the analysis of two different sets of ML repositories (one containing reproducible and the other non-reproducible repositories), relevant indicators are identified. Representative values ​​and weighting are then assigned to these relevant indicators using statistical and heuristic methods. The analysis results of both sets can be viewed [here]([https://git.fim.uni-passau.de/loosmartin/](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/assets/data_for_factor_indicator_connection).
 3. These values ​​can then be used to compare the measured values ​​with the representative ones when analyzing an ML repository. Because the values ​​can have different ranges, we use range normalization to merge these intermediate indicator scores into an overall score for one factor.
 4. Based on the intermediate results of the indicators and the overall result of a factor, the tool can then provide feedback that can be used to increase the reproducibility probability.
 
@@ -58,7 +58,7 @@ $ curl -V
 Then, you need to **download** this repository in order to be able to run the code locally.
 
 ```
-$ git clone https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool.git
+$ git clone https://github.com/martinloos/ml_repository_reproducibility_analysis_tool.git
 ```
 
 **Change** the **working directory** to the downloaded folder
@@ -75,9 +75,9 @@ $ pip install -r requirements.txt
 
 Then only the following **two modifications have to be made**:
 
-1. Change the csv_path in the [main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py#L20) file (the generated output files will be saved under this path).
+1. Change the csv_path in the [main.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py#L20) file (the generated output files will be saved under this path).
 
-2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
+2. Replace the stored BinderHub IP with the IP or URL of your BinderHub in the [binderhub_call.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py#L11) file. This configuration is optional. The tool will still work if you don't have a BinderHub deployed. Note the additional information on this in the feedback file.
 
 > Note: Don't forget to save these changes.
 
@@ -110,7 +110,7 @@ This tool produces output in 3 different places.
 
 The result and the feedback file are saved under the specified output path (`default: "/tmp"`).
 
-Sample output files can be viewed [here](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/assets/output_examples).
+Sample output files can be viewed [here](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/assets/output_examples).
 
 Architecture
 --------------------------
@@ -118,37 +118,37 @@ In order to explain the interaction and the order of execution of the individual
 
 ![Tool flow chart](/assets/images/flowchart.png?raw=true)
 
-**[main.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py)**: Entry point. Processes the terminal command and executes each source code file in the order described in the flowchart.
+**[main.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/main.py)**: Entry point. Processes the terminal command and executes each source code file in the order described in the flowchart.
 
-**[repository_cloner.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/repository_cloner.py)**: Downloads the provided GitHub repository locally to the "/tmp" folder if not already present there.
+**[repository_cloner.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/repository_cloner.py)**: Downloads the provided GitHub repository locally to the "/tmp" folder if not already present there.
 
-**[filter_repository_artefacts.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/filter_repository_artefacts.py)**: Analyses the locally downloaded repository and stores lists of relevant files and directories.
+**[filter_repository_artefacts.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/filter_repository_artefacts.py)**: Analyses the locally downloaded repository and stores lists of relevant files and directories.
 
-**[readme_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/readme_analysis.py)**: Analyses the identified readme file(s) from filter_repository_artefacts.py. Stores the result of the readme analysis.
+**[readme_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/readme_analysis.py)**: Analyses the identified readme file(s) from filter_repository_artefacts.py. Stores the result of the readme analysis.
 
-**[license_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/license_analysis.py)**: Analyses the identified license file(s) from filter_repository_artefacts.py. Stores the result of the license analysis.
+**[license_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/license_analysis.py)**: Analyses the identified license file(s) from filter_repository_artefacts.py. Stores the result of the license analysis.
 
-**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Analyses the identified dataset file(s) and folder(s) from filter_repository_artefacts.py. Stores possible dataset candidates, which later will be checked if they are mentioned in the source code file(s).
+**[dataset_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Analyses the identified dataset file(s) and folder(s) from filter_repository_artefacts.py. Stores possible dataset candidates, which later will be checked if they are mentioned in the source code file(s).
 
-**[source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/source_code_analysis.py)**: Analyses the identified source code file(s) from filter_repository_artefacts.py. Stores the overall result of the source code file(s) analysis. Note: Other source code type analysis files (e.g. C, R, Java, etc.) should be plugged in here, in case one wants to support them.
+**[source_code_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/source_code_analysis.py)**: Analyses the identified source code file(s) from filter_repository_artefacts.py. Stores the overall result of the source code file(s) analysis. Note: Other source code type analysis files (e.g. C, R, Java, etc.) should be plugged in here, in case one wants to support them.
 
-**[python_source_code_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/python_source_code_analysis.py)**: This file will be called by source_code_analysis.py for each identified .py or .ipynb file. Converts .ipynb to .py file using nbconvert and performs analysis of the python file. Returns the analysis result.
+**[python_source_code_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/python_source_code_analysis.py)**: This file will be called by source_code_analysis.py for each identified .py or .ipynb file. Converts .ipynb to .py file using nbconvert and performs analysis of the python file. Returns the analysis result.
 
-**[dataset_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Building the dataset result based on the analysis result of the source_code_analysis.py file where we check for each source code file wether or not a dataset file candidate is mentioned. Stores the result of the dataset analysis.
+**[dataset_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/dataset_analysis.py)**: Building the dataset result based on the analysis result of the source_code_analysis.py file where we check for each source code file wether or not a dataset file candidate is mentioned. Stores the result of the dataset analysis.
 
-**[config_files_analysis.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/config_files_analysis.py)**: Analyses the identified configuration file(s) from filter_repository_artefacts.py. Uses result of source_code_analysis.py regarding source code imports. Stores the result of the config file(s) analysis.
+**[config_files_analysis.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/config_files_analysis.py)**: Analyses the identified configuration file(s) from filter_repository_artefacts.py. Uses result of source_code_analysis.py regarding source code imports. Stores the result of the config file(s) analysis.
 
-**[binderhub_call.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py)**: Tries to build the provided GitHub repository using the configured BinderHub IP/URL. Can result in three different results: BinderHub not reachable, not buildable or buildable. Stores the result.
+**[binderhub_call.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/binderhub_call.py)**: Tries to build the provided GitHub repository using the configured BinderHub IP/URL. Can result in three different results: BinderHub not reachable, not buildable or buildable. Stores the result.
 
-**[result_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/result_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file.
+**[result_builder.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/result_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file.
 
-**[feedback_builder.py](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/feedback_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file. Extracts the relevant indicators from the overall analysis result of result_builder.py. These results are used to score each factor. This is based on the indicators associated with a factor and the factor-indicator-connection approach described in the paper. Feedback is generated for each factor and its associated indicators and stored in the feedback .md file.
+**[feedback_builder.py](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/modules/feedback_builder.py)**: Collects the individual partial results and creates an overall result. This will be saved in the result CSV file. Extracts the relevant indicators from the overall analysis result of result_builder.py. These results are used to score each factor. This is based on the indicators associated with a factor and the factor-indicator-connection approach described in the paper. Feedback is generated for each factor and its associated indicators and stored in the feedback .md file.
 
 Presentation
 --------------------------
 
-[Thesis Presentation](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis_presentation.pdf)
+[Thesis Presentation](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/thesis_presentation.pdf)
 
 License
 --------------------------
-[MIT](https://git.fim.uni-passau.de/loosmartin/ml_repository_reproducibility_analysis_tool/-/blob/master/LICENSE)
+[MIT](https://github.com/martinloos/ml_repository_reproducibility_analysis_tool/-/blob/master/LICENSE)
